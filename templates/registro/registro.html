@@ -1,0 +1,707 @@
+{% extends "base/base.html" %}
+
+    {% block cssfile %}
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    
+    {% block jsfile %}
+    <script src="{{STATIC_URL}}js/apprise.js"></script>
+    <script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    <script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block scripti %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+		$("#id_reg_1_x_10").attr('class','active');
+		$('input:text').val('');
+		
+		var entero = "0123456789";
+		$('#cedula_jefe,#cedula,#telefono').validar(entero);
+		$('#cedula_jefe').focus().attr('maxlength','10');
+		$('#h_ced_jefe').val('true')
+		var TUbch = $('#tabla_ubch').dataTable({
+			"iDisplayLength": 10,
+			"iDisplayStart": 0,
+			"sPaginationType": "full_numbers",
+			"aLengthMenu": [10, 20, 30, 40, 50],
+			"oLanguage": {"sUrl": "/static/js/es.txt"},
+			"aoColumns": [
+				{"sClass": "control", "sWidth": "4%"},
+				{"sClass": "registro right", "sWidth": "4%"},
+				{"sClass": "registro right", "sWidth": "5%"},
+				{"sClass": "registro left", "sWidth": "25%"},
+				{"sClass": "registro right", "sWidth": "8%"},
+				{"sClass": "registro right", "sWidth": "11%"},
+				{"sClass": "registro left", },
+				{"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false},
+				{"sClass": "none", },
+			]
+		    })
+		 
+		var url = 'www.registro1x10.org.ve'
+	    //var url = "localhost:8000"
+		$('#buscar_patru').click(function(){
+		    var este  = $(this)
+		    var $cedula = $('#cedula_jefe')
+		    $('div#div_registro').slideUp(1000);
+		    $('div#div_lista').slideDown(1000);
+		    $('#restablecer').trigger('click');
+		    if( !$(".appriseInner").is(":visible") == true){ 
+			
+				if ($cedula.val() === null || $cedula.val().length === 0 || /^\s+$/.test($cedula.val())) {
+					apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de  C&eacute;dula</span>', {'textOk': 'Aceptar'}, function() {
+						$cedula.parent('div').addClass('has-error')
+						$cedula.focus()
+					});
+				}else{
+			        TUbch.fnClearTable();
+				
+			        $.get("http://"+url+"/ubch/unodiez/",{cedula:$cedula.val()}, function(response) {
+				        if (response.existe == 'no') {
+				            apprise('<span style="color:#FF0000;font-weight:bold">Esta n&uacute;mero de C&eacute;dula no esta registrada como un patrullero</span>', {'textOk': 'Aceptar'}, function() {
+					            $('#cedula_jefe').parent('div').addClass('has-error')
+					            $('#cedula_jefe').focus().select()
+					            $('#nombre_patru,#apellido_patru,#telefono_patru,#twitter_patru').val('')
+					            $('#div_nuevo').css('display','none');
+					            $('div#div_registro').slideUp(1000);
+					            $('div#div_lista').slideDown(1000);
+				            });
+				        }else{
+				            var s_nombre = '';
+				            if (response.patrullero.s_nombre != null) {
+					            s_nombre = response.patrullero.s_nombre
+				            }
+				            var s_apellido = '';
+				            if (response.patrullero.s_apellido != null) {
+					            s_apellido = response.patrullero.s_apellido
+				            }
+					            
+				            $('#nombre_patru').val(response.patrullero.p_nombre + ' '+ s_nombre)
+				            $('#apellido_patru').val(response.patrullero.p_apellido+ ' '+ s_apellido)
+				            $('#telefono_patru').val(response.patrullero.telefono)
+				            $('#twitter_patru').val(response.patrullero.twitter)
+				            $('#div_nuevo').css('display','block');
+
+					        $.each(response.unodiez, function(i, obj) {
+					            var s_nombre = '';
+								if (obj.s_nombre != null) {
+									s_nombre = response.patrullero.s_nombre
+								}
+								var s_apellido = '';
+								if (obj.s_apellido != null) {
+									s_apellido = obj.s_apellido
+								}
+								var nombre = obj.p_nombre+' '+s_nombre+' '+obj.p_apellido+' '+s_apellido
+								var eli = '<img class="eliminar" id ="'+obj.id+'" style="width:24px;height:24px;cursor:pointer"  src="/static/img/eliminar.png" />';
+
+								var contador = i+1;
+								TUbch.fnAddData(['',contador,obj.cedula,nombre,obj.telefono,obj.cod_ubch,obj.nom_ubch,eli,obj.direcc_p]);
+							});
+
+				        }
+			        },'json').fail(function() {
+					        apprise('<span style="color:#FF0000;font-weight:bold">Esta C&eacute;dula no pertenece a un jefe de patrulla</span>', {'textOk': 'Aceptar'}, function() {
+						        $('#nombre_patru,#apellido_patru,#telefono_patru,#twitter_patru').val('');
+					        });  
+					}); 
+			    }
+		    }
+		})
+		
+		
+		$('#buscar').click(function(){
+		    var este = $(this)
+		    var cedula = $('#cedula').val()
+		    $('#telefono,#twitter,#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch,#id_direcc_p').val('')
+		    if( !$(".appriseInner").is(":visible") == true){ 
+			$.get("http://consultaelectoral.bva.org.ve/cedula="+cedula, function(data) {
+				$('#p_nombre').val(data[0].p_nombre)
+				$('#s_nombre').val(data[0].s_nombre)
+				$('#p_apellido').val(data[0].p_apellido)
+				$('#s_apellido').val(data[0].s_apellido)
+				$('#cod_ubch').val(data[0].cod_nuevo)
+				$('#ubch').val(data[0].c_votacion)
+				$('#id_estado').val(data[0].cod_estado);
+				$('#id_municipio').val(data[0].cod_municipio);
+				$('#id_parroquia').val(data[0].cod_parroquia);
+				$("#id_direcc_u").val(data[0].c_direccion);
+				$("#id_estado_p").val(data[0].nom_estado);
+				$("#id_municipio_p").val(data[0].nom_mun);
+				$("#id_parroquia_p").val(data[0].nom_parroquia);
+				
+			},'json').fail(function() {
+			    apprise('<span style="color:#FF0000;font-weight:bold">Esta C&eacute;dula no se encuentra registrada en el CNE</span>', {'textOk': 'Aceptar'}, function() {
+				    este.parent('div').addClass('has-error')
+				    este.focus().select()
+				    $('#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch,#id_direcc_p').val('')
+			    });
+			});
+		    }
+		})
+		
+		$("#cedula_jefe").on({
+		    focus: function() {
+			$('#h_ced_jefe').val('true')
+			$('#h_ced').val('false')
+			$('#h_ced_jefe_m').val('false');
+		    },
+		    blur:function(){
+			$('#h_ced_jefe').val('false')
+		    }
+		});
+	
+		$("#cedula").on({
+		    focus: function() {
+			$('#h_ced').val('true')
+			$('#h_ced_jefe').val('false')
+			$('#h_ced_jefe_m').val('false');
+		    },
+			blur:function(){
+			$('#h_ced').val('false')
+		    }
+		});
+		
+		$("#cedula_jefe_m").on({
+		    focus: function() {
+			$('#h_ced_jefe_m').val('true');
+			$('#h_ced').val('false')
+			$('#h_ced_jefe').val('false')
+		    },
+			blur:function(){
+			$('#h_ced_jefe_m').val('false');
+		    }
+		});
+		
+		
+		$(document).on('keypress', function(e) {
+		    var code = (e.which) ? e.which : e.keyCode
+		    if (code == 13) {
+			var ced_jefe = $('#h_ced_jefe').val()
+			var ced = $('#h_ced').val()
+			var ced_jefe_m = $('#h_ced_jefe_m').val()
+			if (ced_jefe == 'true') {
+				$('#buscar_patru').trigger('click');
+			} else if (ced == 'true') {
+				$('#buscar').trigger('click');
+			}else if (ced_jefe_m == 'true') {
+				$('#buscar_patru_m').trigger('click');
+			}
+		    }
+		});
+		
+		$('#registrar').click(function(){
+		    var $cedula = $('#cedula')
+		    var $telefono = $('#telefono')
+		    var $twitter = $('#twitter')
+		     var $direccion = $('#id_direcc_p')
+		    if( !$(".appriseInner").is(":visible") == true){ 
+			if ($cedula.val() === null || $cedula.val().length === 0 || /^\s+$/.test($cedula.val())) {
+			    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de C&eacute;dula</span>', {'textOk': 'Aceptar'}, function() {
+				$cedula.parent('div').addClass('has-error');
+				$cedula.focus();
+			    });
+			}else  if ($telefono.val() == '') {
+			    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de Tel&eacute;fono</span>', {'textOk': 'Aceptar'}, function() {
+				$telefono.parent('div').addClass('has-error');
+				$telefono.focus();
+			    });
+			}else if($cedula.val() == $('#cedula_jefe').val()){
+			    apprise('<span style="color:#FF0000;font-weight:bold">No puede registrar la misma C&eacute;dula del jefe de patrulla a las lista de 1X10</span>', {'textOk': 'Aceptar'}, function() {
+				$cedula.parent('div').addClass('has-error');
+				$cedula.focus();
+			    });
+			}else if($direccion.val() === null || $direccion.val().length === 0 || /^\s+$/.test($direccion.val())){
+			    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar la direcci&oacute;n</span>', {'textOk': 'Aceptar'}, function() {
+				$direccion.parent('div').addClass('has-error');
+				$direccion.focus();
+			    });
+			}else{
+			    $('#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch').prop('disabled',false)
+			    $.post( "", $("#frmregistro").serialize()+'&accion=guardar', function(response){
+				    $('#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch').prop('disabled',true)
+				if (response['cedula_clp'] == 'existe') {
+				    apprise('<span style="color:#FF0000;font-weight:bold">Este n&uacute;mero de C&eacute;dula pertenece a un Jefe de Clp y no puede ser registrado</span>', {'textOk': 'Aceptar'}, function() {
+					$cedula.parent('div').addClass('has-error');
+					$cedula.focus().select();
+				    });
+				}else if (response['cedula_ubch'] == 'existe') {
+				    apprise('<span style="color:#FF0000;font-weight:bold">Este n&uacute;mero de C&eacute;dula pertenece a un Jefe de patrulla de UBCH y no puede ser registrado</span>', {'textOk': 'Aceptar'}, function() {
+					$cedula.parent('div').addClass('has-error');
+					$cedula.focus().select();
+				    });
+				}else if (response['cedula_patrullero'] == 'existe') {
+					apprise('<span style="color:#FF0000;font-weight:bold">Este n&uacute;mero de C&eacute;dula pertenece a un Patrullero de UBCH y no puede ser registrado</span>', {'textOk': 'Aceptar'}, function() {
+					    $cedula.parent('div').addClass('has-error');
+					    $cedula.focus().select();
+					});
+				}else if (response['cedula_patr'] == 'existe') {
+				    apprise('<span style="color:#FF0000;font-weight:bold">Este n&uacute;mero de C&eacute;dula ya pertenece a su lista 1X10</span>', {'textOk': 'Aceptar'}, function() {
+					$cedula.parent('div').addClass('has-error');
+					$cedula.focus().select();
+				    });
+				}else if(response['cedula'] == 'existe'){
+				     apprise('<span style="color:#FF0000;font-weight:bold">Este n&uacute;mero de C&eacute;dula ya pertenece a lista de 1X10 del patrullero,<br/> "'+response['nombre']+'" C&eacute;dula: '+response['cedula_pa']+'</span>', {'textOk': 'Aceptar'}, function() {
+					$cedula.parent('div').addClass('has-error');
+					$cedula.focus().select();
+				    });
+				}else if (response['save'] == 'ok') {
+				    var cedula = $('#cedula').val()
+				    var nombres = $('#p_nombre').val()+' '+$('#s_nombre').val()+' '+$('#p_apellido').val()+' '+$('#s_apellido').val()
+				    var telefono = $('#telefono').val()
+				    var twitter = $('#twitter').val()
+				    var cod_ubch = $('#cod_ubch').val()
+				    var ubch = $('#ubch').val()
+				    var direccion = $('#id_direcc_p')
+				    var id = response['id']
+				    var totalfilas = TUbch.fnGetData().length;
+				    var ultimo = totalfilas + 1;
+				    apprise('<span style="color:#059102;font-weight:bold">El registro se guardo sastifactoriamente', {'textOk': 'Aceptar'}, function() {
+					var eli = '<img class="eliminar" id ="'+id+'" style="width:24px;height:24px;cursor:pointer"  src="/static/img/eliminar.png" />';
+					TUbch.fnAddData(['',ultimo,cedula, nombres,telefono,cod_ubch,ubch,eli,direccion.val()]);
+					$('div#div_registro').slideUp(1000);
+					$('div#div_lista').slideDown(1000);
+					$('#cedula,#telefono,#twitter,#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch,#id_direcc_p').val('')
+					$('#div_nuevo').css('display','block');
+				    });
+				}
+			    },'json');
+			}
+		    }
+			
+		});
+
+		$('#cancelar').click(function(){
+		    $('div#div_registro').slideUp(1000);
+		    $('div#div_lista').slideDown(1000);
+		    $('#cedula,#telefono,#twitter,#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch').val('')
+		    $('#div_nuevo').css('display','block');
+		});
+		
+		$('#add').click(function(){
+		    $('#div_nuevo').css('display','none')
+		    $('div#div_lista').slideUp(1000);
+		    $('div#div_registro').slideDown(1000,function(){
+			$('#cedula').focus();
+		    });
+			
+		});
+		
+		$('#tabla_ubch').on('click', 'img.eliminar', function() {
+		    var id_reg = $(this).attr('id')
+		    var padre      = $(this).closest('tr');
+		    var nRow       = padre[0];
+		    apprise('<span style="color:#FF0000;font-weight:bold">&iquest;Desea Eliminar el registro?</span>', {'verify': true, 'textYes': 'Aceptar', 'textNo': 'Cancelar'}, function(r) {
+			if (r) {
+			    $.post("http://"+url+"/ubch/eliminar/"+id_reg, {csrfmiddlewaretoken: '{{ csrf_token }}','accion':'eliminar'}, function(response) {
+				if (response.eliminar == 'ok') {
+				    TUbch.fnDeleteRow(nRow);
+				    apprise('<span style="color:#059102;font-weight:bold">El registro ha sido eliminado sastifactoriamente', {'textOk': 'Aceptar'});
+				}
+			    },'json');
+			}
+		    });
+		});
+		
+		
+		$('#modificar').on('click', function () {
+		    $('div#div_lista').slideUp(1000);
+		    $('#div_nuevo').css('display','none')
+		    $('div#divmodificar').slideDown(1000, function () {
+			$('#cedula_jefe_m').focus();
+			$('#h_ced_jefe_m').val('true');
+		    });
+		});
+		
+		$('#buscar_patru_m').click(function(){
+		    var este = $(this)
+		    var $cedula = $('#cedula_jefe_m')
+		    
+		    $('div#div_registro').slideUp(1000);
+		    //$('div#div_lista').slideDown(1000);
+		    if (!$(".appriseInner").is(":visible") == true){
+			if ($cedula.val() === null || $cedula.val().length === 0 || /^\s+$/.test($cedula.val())) {
+			    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de  C&eacute;dula</span>', {'textOk': 'Aceptar'}, function () {
+				$cedula.parent('div').addClass('has-error')
+				$cedula.focus()
+			    });
+			} else {
+			    $.post('', {'cedula': $cedula.val(), 'csrfmiddlewaretoken': "{{ csrf_token }}", 'accion': 'buscar'}, function (data) {
+				if (data['existe'] == 'no') {
+				    apprise('<span style="color:#FF0000;font-weight:bold">Esta n&uacute;mero de C&eacute;dula no esta registrada como un patrullero</span>', {'textOk': 'Aceptar'}, function () {
+					$('#cedula_jefe_m').parent('div').addClass('has-error')
+					$('#cedula_jefe_m').focus().select()
+					$('#nombre_patru_m,#apellido_patru_m,#telefono_patru_m,#twitter_patru_m').val('')
+				    });
+				} else {
+				    $('#nombre_patru_m').val(data[0].p_nombre + ' ' + data[0].s_nombre)
+				    $('#apellido_patru_m').val(data[0].p_apellido + ' ' + data[0].s_apellido)
+				    $('#telefono_patru_m').val(data[0].telefono)
+				    $('#twitter_patru_m').val(data[0].twitter)
+				}
+			    }, 'json')
+			}
+		    }
+		});
+		
+		$('#guardar').on('click', function () {
+		    if ($('#cedula_jefe').val() == $('#cedula_jefe_m').val()) {
+			apprise('<span style="color:#FF0000;font-weight:bold">No se puede modificar el mismo n&uacute;mero de C&eacute;dula</span>', {'textOk': 'Aceptar'}, function() {
+			    $('#cedula_jefe').parent('div').addClass('has-error');
+			    $('#cedula_jefe_m').parent('div').addClass('has-error');
+			});
+		    }else{
+			apprise('<span style="color:#FF0000;font-weight:bold">&iquest;Desea Modificar el registro?</span>', {'verify': true, 'textYes': 'Aceptar', 'textNo': 'Cancelar'}, function (r) {
+			    if(r){
+				$cedula_jefe = $('#cedula_jefe').val();
+				var data_send     = $('#frmmodificar').serialize() + '&' + $.param({cedula_jefe:$cedula_jefe,accion: 'update','csrfmiddlewaretoken': "{{ csrf_token }}"});
+				$.post("", data_send, function (response) {
+				    if (response['update'] == 'ok') {
+					apprise('<span style="color:#059102;font-weight:bold">El registro ha sido modificado sastifactoriamente', {'textOk': 'Aceptar'},function(){
+					    $('#cedula_jefe').val($('#cedula_jefe_m').val())
+					    $('#nombre_patru').val($('#nombre_patru_m').val())
+					    $('#apellido_patru').val($('#apellido_patru_m').val())
+					    $('#telefono_patru').val($('#telefono_patru_m').val())
+					    $('#twitter_patru').val($('#twitter_patru_m').val())
+					    $('#restablecer').trigger('click')
+					});
+				    }
+				}, 'json');
+			    }
+			});
+		    }
+		});
+		$('#restablecer').on('click', function () {
+		    $('#div_nuevo').css('display','block')
+		    $('div#div_registro').slideUp(1000);
+		    $('div#div_lista').slideDown(1000);
+		    $('div#divmodificar').slideUp(1000);
+		    $('#cedula_jefe_m,#nombre_patru_m,#apellido_patru_m,#telefono_patru_m,#twitter_patru_m').val('')
+		});
+	
+	    });
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	.oculto{
+	    display: none
+	}
+	#tbljefe{
+	    font-size: 13px;
+	}
+	#divmodulo {
+	    -moz-animation-duration: 3s;
+	    -webkit-animation-duration: 3s;
+	    -op-animation-duration: 3s;
+	}
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+    </style>
+    {% endblock%}
+    {% block contenido %}
+    <!-- Bloque template de grupos templatag_grupos-->
+	{% load templatag_grupos %}
+	<div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+	    <div class="panel-heading " style="font-weight: bold;font-size: 12px;"><span style="font-size: 16px;font-weight: bold;">Registro de 1X10</span></div>                   
+	    <div class="panel-body">
+		<form id="frmregistro">
+		    {% csrf_token %}
+		    <fieldset>
+			<legend class="titulo">Datos del Patrullero::</legend> 
+			<br/>
+			<br/>
+			<div class="form-inline col-xs-3"></div>
+			<div class="form-group col-xs-6">			
+			    <div class="input-group">
+				<input  type="text" placeholder="C&eacute;dula" id="cedula_jefe" name="cedula_jefe" class="form-control input-sm"/>
+				<input type="hidden" id="h_ced_jefe" value="false"/>
+				<span class="input-group-btn ">
+				    <button style="font-size: 12px;" type="button" id="buscar_patru" class="btn btn-primary btn-sm">
+					Buscar
+					<!--<span class="glyphicon glyphicon-search "></span>-->
+				    </button>
+				</span>
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>Nombre:&nbsp;&nbsp;</label>
+				<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_patru" name="nombre_patru" class="form-control input-sm" placeholder="Nombre">                           
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Apellido:</label>
+				<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="apellido_patru" name="apellido_patru" class="form-control input-sm" placeholder="Apellido"> 
+			    </div>                        
+			</div>
+			<br/>
+			<br/>
+			<br/>                    
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>Tel&eacute;fono:</label>
+				<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="telefono_patru" name="telefono_patru" class="form-control input-sm" placeholder="Tel&eacute;fono"> 
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Twitter:&nbsp;&nbsp;</label>
+				<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="twitter_patru" name="twitter_patru" class="form-control input-sm" placeholder="Twitter"> 
+			    </div>                        
+			</div>
+		    </fieldset>
+		    <br/>
+		    <br/>
+		    <br/>
+		    <br/>
+		    <div id="div_nuevo" style="display: none">
+			<div class="col-xs-3"></div>
+			<div class="form-group col-xs-6">			
+			    <div id="div_add" style="margin: 0 auto;text-align: center;" class="form-group">
+				<div class="col-xs-5">
+				    <button type="button" id="add" class="btn btn-success btn-block btn-large" >
+					<span class="glyphicon glyphicon-plus "></span>
+					Nuevo Registro
+				    </button>
+				</div>
+				<!-- Validacion para la restringir a un grupo de usuario -->
+				{%  ifusergroup administrador %}
+				<div class="col-xs-5">
+                            <button type="button" id="modificar" class="btn btn-info btn-block btn-large" >
+				<span class="glyphicon glyphicon-edit "></span>
+                                Modificar Patrullero
+                            </button>
+                        </div>
+                {% endifusergroup %}
+			    </div>
+			</div>
+		    </div>
+		    <br/>
+		    <br/>
+		    <br/>
+		    <br/>
+		    <div id="div_registro" style="display: none">
+			<fieldset>
+			    <legend class="titulo">Datos Personales::</legend>
+			
+			<br/>
+			<div class="form-inline col-xs-3"></div>
+			<div class="form-group col-xs-6">			
+			    <div class="input-group">
+				<input  type="text" placeholder="C&eacute;dula" id="cedula" name="cedula" class="form-control input-sm" />
+				<input type="hidden" id="h_ced" value="false"/>
+				<span class="input-group-btn ">
+				    <button style="font-size: 12px;" type="button" id="buscar" class="btn btn-primary btn-sm">
+					Buscar
+					<!--<span class="glyphicon glyphicon-search "></span>-->
+				    </button>
+				</span>
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>Primer Nombre:&nbsp;</label>
+				<input  style="width: 65%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="p_nombre" name="p_nombre" class="form-control input-sm" placeholder="Primer Nombre">                           
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Segundo Nombre:&nbsp;&nbsp;</label>
+				<input  style="width: 62%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="s_nombre" name="s_nombre" class="form-control input-sm" placeholder="Segundo Nombre"> 
+			    </div>                        
+			</div>
+			<br/>
+			<br/>
+			<br/>                    
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>Primer Apellido:&nbsp;&nbsp;</label>
+				<input  style="width: 65%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="p_apellido" name="p_apellido" class="form-control input-sm" placeholder="Primer Apellido"> 
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Segundo Apellido:&nbsp;</label>
+				<input  style="width: 62%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="s_apellido" name="s_apellido" class="form-control input-sm" placeholder="Segundo Apellido"> 
+			    </div>                        
+			</div>
+			<br/>
+			<br/>
+			<br/>   
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>Tel&eacute;fono:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				<input  style="width: 65%;background-color:#FFFFFF;color:#000000" id="telefono" name="telefono" class="form-control input-sm" placeholder="Tel&eacute;fono" maxlength="11">                           
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Twitter:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				<input  style="width: 62%;background-color:#FFFFFF;color:#000000" id="twitter" name="twitter" class="form-control input-sm" placeholder="Twitter"> 
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-12">
+				<label>Dirección:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</label>
+			    <textarea class="form-control input-sm"  style="width: 85%;background-color:#FFFFFF;color:#000000;resize: none" id="id_direcc_p" maxlength="100" name="direcc_p" rows="2"></textarea>    
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<br/>
+			<fieldset>
+			    <legend class="titulo">Datos de la UBCH::</legend>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-4">
+				    <label>Cod UBCH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				    <input type='text' class="form-control input-sm" disabled="disabled" style="width: 60%;background-color:#FFFFFF;color:#000000;resize: none" id="cod_ubch" name="cod_ubch">
+				</div>
+				<div class="form-group col-md-8">
+				    <label>UBCH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				    <input type='text' class="form-control input-sm" disabled="disabled" style="width: 80.5%;background-color:#FFFFFF;color:#000000;resize: none" id="ubch" name="ubch">
+				</div>
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-4">
+				    <label>Estado:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				    <input type='text' disabled="disabled" class="form-control input-sm" style="width: 60%;background-color:#FFFFFF;color:#000000;resize: none" id="id_estado_p">
+				</div>
+				<div class="form-group col-xs-8">
+				    <label>Municipio:&nbsp;&nbsp;</label>
+				    <input type='text' disabled="disabled" class="form-control input-sm" style="width: 80%;background-color:#FFFFFF;color:#000000;resize: none" id="id_municipio_p">
+				</div>
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-12">
+				    <label>Parroquia:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				    <input type='text' disabled="disabled" class="form-control input-sm" style="width: 85%;background-color:#FFFFFF;color:#000000;resize: none" id="id_parroquia_p">
+				</div>
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-12">
+				    <label>Dirección:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</label>
+				<textarea class="form-control input-sm" disabled="disabled" style="width: 85%;background-color:#FFFFFF;color:#000000;resize: none" id="id_direcc_u" maxlength="100" name="direcc_u" rows="2"></textarea>    
+				</div>
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-12" style="text-align:center">
+				    <input style="margin:  auto;" class="btn btn-primary btn-sm" type="button" id="registrar" value="Registrar"/>
+				    &nbsp;
+				    <input class="btn btn-primary btn-sm" type="button" id="cancelar" value="Cancelar"/>
+				    <input type='hidden' id='id_estado' name='estado'>
+				    <input type='hidden' id='id_municipio' name='municipio'>
+				    <input type='hidden' id='id_parroquia' name='parroquia'>
+				</div>
+			    </div>
+			    
+			</fieldset>
+		    </div>
+		</form>
+		<div id="divmodificar" style="display: none">
+		    <form id="frmmodificar">
+			<fieldset>
+			    <legend class="titulo">Datos del Patrullero::</legend>
+			    <br/>
+			    <br/>
+			    <div class="form-inline col-xs-3"></div>
+			    <div class="form-group col-xs-6">			
+				<div class="input-group">
+				    <input  type="text" placeholder="C&eacute;dula" id="cedula_jefe_m" name="cedula_jefe_m" class="form-control input-sm" />
+				    <input type="hidden" id="h_ced_jefe_m" value="false"/>
+				    <span class="input-group-btn ">
+					<button style="font-size: 12px;" type="button" id="buscar_patru_m" class="btn btn-primary btn-sm">
+						Buscar
+						<!--<span class="glyphicon glyphicon-search "></span>-->
+					</button>
+				    </span>
+				</div>
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-6">
+				    <label>Nombre:&nbsp;&nbsp;</label>
+				    <input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_patru_m" name="nombre_patru_m" class="form-control input-sm" placeholder="Nombre">                           
+				</div>
+				<div class="form-group col-xs-6">
+				    <label>Apellido:</label>
+				    <input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="apellido_patru_m" name="apellido_patru_m" class="form-control input-sm" placeholder="Apellido"> 
+				</div>                        
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>                    
+			    <div class="form-inline">
+				<div class="form-group col-xs-6">
+				    <label>Tel&eacute;fono:</label>
+				    <input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="telefono_patru_m" name="telefono_patru_m" class="form-control input-sm" placeholder="Tel&eacute;fono"> 
+				</div>
+				<div class="form-group col-xs-6">
+				    <label>Twitter:&nbsp;&nbsp;</label>
+				    <input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="twitter_patru_m" name="twitter_patru_m" class="form-control input-sm" placeholder="Twitter"> 
+				</div>                        
+			    </div>
+			    <br/>
+			    <br/>
+			    <br/>
+			    <div class="form-inline">
+				<div class="form-group col-xs-12" style="text-align:center;">
+				    <input style="margin: 0 auto" class="btn btn-primary btn-sm" type="button" id="guardar" value="Guardar"/>
+				    &nbsp
+				    <input class="btn btn-primary btn-sm" type="button" id="restablecer" value="Cancelar"/>
+				</div>
+			    </div>
+			</fieldset> 
+		    </form>
+		</div>
+		<div id="div_lista" class="col-xs-12" style="width: 100%">				    
+		    <table  style="width: 100%" border="0" align="center" class="table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+			<thead>
+			    <tr class="info">
+				<th width="58">&nbsp;</th>
+				<th width="58">N&deg</th>
+				<th width="58">Cedula</th>
+				<th width="64">Nombres</th>
+				<th width="64">Telefono</th>
+				<th width="64">Cod UBCH</th>
+				<th width="64">UBCH</th>
+				<th width="64">Eliminar</th>
+				<th width="64">Direcci&oacute;n</th>
+			    </tr>
+			</thead>
+			<tbody>
+			</tbody>
+		    </table>
+		</div>
+	    </div>                 
+        </div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+{% block title %}Registrar usuario{% endblock %}
+    
+{% block contenido %}
+    
+	<form method="post">
+	   {% csrf_token %}
+	   <table>
+	    <tr>
+                <h1>Registrar usuario</h1>
+                 <tr>
+	      <tr>
+	       <tr>
+	           <td>Usuario</td>
+	           <td><input id="id_username" required maxlength="30" name="username" type="text"/></td>
+	       </tr>
+	       <tr>
+	           <td>Contraseña</td>
+	           <td><input id="id_password1" required name="password1" type="password"/></td>
+	       </tr>
+	       <tr>
+	           <td>Confirmar contraseña</td>
+	           <td><input id="id_password2" required name="password2" type="password"/></td>
+	       </tr>
+	       <tr>
+	       		<td>Teléfono</td>
+	       		<td>
+	       		<input type='text' id='tlf' name='tlf'>
+	       		<input type='hidden' id='user_accion' name='user_accion' readonly value='{{user}}'>
+	       		</td>
+	       </tr>
+	       <tr>
+	        <td><input type="submit" value="Registrar"></td>
+	       </tr>
+	   </table>
+		<div style="text-align:left;" class="alert alert-info">
+			<li>
+				Obligatorio. Longitud máxima de 30 caracteres. Sólo puede estar formado por letras, números y los caracteres @/./+/-/_.
+			</li>
+			
+			<li>
+				Para verificación, introduzca la misma contraseña que introdujo arriba.
+			</li>
+		</div>
+    </form>
+    {% endblock contenido%}

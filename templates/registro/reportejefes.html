@@ -1,0 +1,154 @@
+{% extends "base/base.html" %}
+
+	{% block cssfile %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+	{% endblock  %}
+	{% block jsfile %}
+	<script src="{{STATIC_URL}}js/apprise.js"></script>
+	<script src="{{STATIC_URL}}js/validarcampos.js"></script>
+	{% endblock  %}
+
+{% block scripti %}
+<script type="text/javascript">
+$(document).ready(function () {
+        $("#id_reportes").attr('class','active');
+        var entero = "0123456789"
+        $('#cedula_jefe').attr('maxlength','10').validar(entero);
+        $("#cedula_jefe,#nombre_jefe,#cod_ubch_jefe,#ubch_jefe").val("");
+	$("#cedula_jefe").focus();
+	//var url = 'localhost:8000';
+        var url = 'www.registro1x10.org.ve';
+	$('#buscar_jefe').click(function () {
+            
+            var cedula_jefe = $('#cedula_jefe')
+            if( !$(".appriseInner").is(":visible") == true){ 
+                if (cedula_jefe.val() === null || cedula_jefe.val().length === 0 || /^\s+$/.test(cedula_jefe.val())) {
+                    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el C&oacute;digo del CLP</span>', {'textOk': 'Aceptar'}, function () {
+                        cod_ubch.parent('div').addClass('has-error');
+                        cod_ubch.focus();
+                    });
+                } else {
+                    $.get("http://"+url+"/ubch/cedula="+cedula_jefe.val(), function(data) {
+                        $('#nombre_jefe').val(data[0].nombre);
+			$('#cod_ubch_jefe').val(data[0].cod_ubch);
+			$('#ubch_jefe').val(data[0].nom_ubch);
+		
+                    }, 'json').error(function(){
+			apprise("<span style='color:#FF0000;font-weight:bold'>No se encontraron registros</span>");
+			$("#nombre_jefe,#cod_ubch_jefe,#ubch_jefe").val("");
+			$("#cedula_jefe").parent('div').addClass('has-error');
+			});
+                }
+            }
+        })
+    
+        $('#reporte').click(function () {
+            var cedula_jefe = $('#cedula_jefe')
+            if( !$(".appriseInner").is(":visible") == true){ 
+                if (cedula_jefe.val() === null || cedula_jefe.val().length === 0 || /^\s+$/.test(cedula_jefe.val())) {
+                    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar la  C&eacute;dula del Jefe de UBCH</span>', {'textOk': 'Aceptar'}, function () {
+                        cod_ubch.parent('div').addClass('has-error');
+                        cod_ubch.focus();
+                    });
+                } else {
+                    url = '../reporte/'+cedula_jefe.val()
+                    window.open(url)
+                }
+            }
+        })
+        
+        
+        $(document).on('keypress', function (e) {
+            var code = (e.which) ? e.which : e.keyCode
+            if (code == 13) {
+		$('#buscar_jefe').trigger('click');
+                
+            }
+        });
+    
+    
+        $('#cancelar').click(function () {
+            $('div#div_registro').slideUp(1000);
+            $('div#div_lista').slideDown(1000);
+            $('#cod_ubch,#ubch').val('')
+            $('#add').css('display', 'block');
+        });
+	
+	
+
+    });
+
+</script>
+{% endblock  %}
+{% block estilos %}
+<style>
+    .titulo{
+        color: #1b809e;
+        padding: 0;
+        margin: 0 auto;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+{% endblock%}
+{% block contenido %}
+    <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 70%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+            <span style="font-size: 16px;font-weight: bold;">
+                Reporte de jefes de Patrullas y sus Patrulleros
+            </span>
+        </div>
+	<div class="panel-body">
+		<form id="frmregistro">
+			<fieldset><legend class="titulo">Jefe de Patrulla de la UBCH::</legend></fieldset> 
+			<br/>
+			<br/>
+			<div class="form-inline col-xs-3"></div>
+			<div class="form-group col-xs-6">			
+			    <div class="input-group">
+				<input  type="text" placeholder="C&eacute;dula" id="cedula_jefe" name="cedula_jefe" class="form-control input-sm" />
+				<input type="hidden" id="h_ced_jefe" value="false"/>
+				<span class="input-group-btn ">
+				    <button style="font-size: 12px;" type="button" id="buscar_jefe" class="btn btn-primary btn-sm">
+					Buscar
+					<!--<span class="glyphicon glyphicon-search "></span>-->
+				    </button>
+				</span>
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>Nombre:&nbsp;&nbsp;</label>
+				<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_jefe" name="nombre_jefe" class="form-control input-sm" placeholder="Nombre">                           
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Cod UBCH:</label>
+				<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="cod_ubch_jefe" name="cod_ubch_jefe" class="form-control input-sm" placeholder="Cod UBCH"> 
+			    </div>                        
+			</div>
+			<br/>
+			<br/>
+			<br/>
+            <div class="form-inline">
+                <div class="form-group col-xs-12">
+                    <label>UBCH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                    <input class="form-control input-sm" disabled="disabled" style="width: 89%;background-color:#FFFFFF;color:#000000;resize: none" id="ubch_jefe" maxlength="150" name="ubch_jefe" />    
+                </div>
+            </div>
+            <br/>
+			<br/>
+			<br/>
+			<div class="row" style="text-align:center;">
+			    <input style="margin: 0 auto" class="btn btn-primary btn-sm" type="button" id="reporte" value="Ver Reporte"/>
+			    &nbsp
+			    <input class="btn btn-primary btn-sm" type="button" id="cancelar" value="Cancelar"/>
+			</div>
+		</form>
+       </div>
+</div>
+{% endblock%}

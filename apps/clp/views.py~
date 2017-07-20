@@ -1,0 +1,95 @@
+from django.views.generic import ListView
+from .models import Clp
+from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, HttpResponseRedirect
+import csv
+import os
+from django.db import connection
+from django.core import serializers
+from apps.clp.serializer import ClpSerializer
+
+
+class ListarView(ListView):
+
+    template_name = 'clp/listar.html'
+    model = Clp
+    paginate_by = 20
+    context_object_name = 'listar_clp'
+#======================================================================================
+# Url Importar data CSV
+#======================================================================================
+def load_data(request):
+
+    os.path.dirname(os.path.abspath(__file__))
+
+    DIR_URL = os.getcwd()
+
+    reader = csv.reader(open(DIR_URL+str("/apps/clp/script/jefes_clp_aragua.csv")))
+
+    # Recorrido de los registros
+    for row in reader:
+        data = row[0].split(';')
+        centro = Clp(
+            nac  = data[0],
+            cedula = data[1],
+            nombres = data[2],
+            sexo = data[3],
+            edad = data[4],
+            telefono = data[5],
+            nomb_agrup = data[6],
+            id_estado = data[7],
+            id_municipio = data[8],
+            id_parroquia = data[9],
+            codigo_circulo = data[10],
+                    )
+
+        centro.save()
+    return HttpResponseRedirect('/clp/listar')
+
+##############################################################################
+#             Clase para capturar datos serializados con viewsets
+##############################################################################
+
+from rest_framework import generics, status
+from rest_framework.exceptions import APIException
+from rest_framework.response import Response
+#import itertools
+from itertools import chain
+from django import http
+from django.http import Http404
+from rest_framework import filters
+
+
+# Clase para validar registro no encontrado
+class NotFound(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    default_detail = 'No se encontraron Registros'
+
+    def __init__(self, detail=None):
+        self.detail = detail or self.default_detail
+
+
+# Generacion de la api
+class RegistroView(generics.ListAPIView):
+
+    model = Clp
+    serializer_class = ClpSerializer
+    lookup_field = 'cedula'
+    #filter_backends = (filters.DjangoFilterBackend,)
+    #filter_fields = ('cedula')
+
+    def get_queryset(self):
+
+        cedula = self.kwargs['cedula']
+
+        if cedula is not None:
+            queryset = Clp.objects.all()
+            queryset = queryset.filter(cedula=cedula)
+
+            if queryset.exists():
+
+                return queryset
+            else:
+
+		raise NotFound()

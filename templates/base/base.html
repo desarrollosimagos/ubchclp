@@ -1,0 +1,243 @@
+<!DOCTYPE HTML>
+<html lang="es">
+    <head>
+        <meta charset="utf-8"/>
+        <title>{% block title %}SISTEMA DE REGISTRO Y CONSULTA DE CLP/UBCH/1x10{% endblock title%}</title>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-theme.css"/>
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/animate.css"/>
+	{% block cssfile %}
+	{% endblock  %}
+        <script src="{{STATIC_URL}}js/jquery-1.11.2.min.js"></script>
+        <script src="{{STATIC_URL}}js/bootstrap.min.js"></script>
+	<script src="{{STATIC_URL}}js/bootbox.js"></script>
+        <script src="{{STATIC_URL}}js/footerfijo.js"></script>
+	{% block jsfile %}
+	{% endblock  %}
+	{% block cssestilo %}
+	{% endblock  %}
+	{% block scripti %}
+        {% endblock  %}
+        <script>
+	        
+	        $(document).ready(function() {
+	        {% block script %}
+	            $('.reporte_1x10ubch').click(function(){
+			var id = $(this).attr('id');
+			console.log('hola');
+		            url = '/ubch/reporte/'+id
+		            window.open(url)
+		        });
+			{% endblock  %}
+	        });
+	        
+	    </script>
+        <style type="text/css">
+            html, body {
+                height: 100%;
+                background-color: #E2E2E2;
+                font-size: 12px;
+            }
+            #contenedor {
+                min-height: 10%;
+                height: auto !important;
+                height: auto;
+                margin: 0 auto 50px;
+            }
+            #header{
+                height: 40px;
+                background-color: #FFFFFF;
+                text-align: center;
+            }
+
+            #footer{
+                height: 55px;
+                background-color: #FFFFFF;
+		{% if request.path == '/menu/' %}
+		    position: absolute;
+		{% else %}
+		    position: relative;
+		{% endif %}
+		
+                bottom: 0px;
+                width:100% !important;
+		
+            }
+
+            #imagenes {
+                position: absolute;
+                top: 45%;
+                left: 50%;
+                height: 30%;
+                width: 50%;
+                margin: 0 0 0 -25%;
+            }
+
+            .imagenes{
+                -moz-animation-duration: 5s;
+                -webkit-animation-duration: 5s;
+                -op-animation-duration: 5s;
+            }
+
+            .imagenes:hover {
+                /*width: 25%*/
+                transform : scale(2);
+                -moz-transform : scale(2); /* Firefox */
+                -webkit-transform : scale(2); /* Chrome - Safari */
+                -o-transform : scale(2); /* Opera */
+                -ms-transform : scale(2); /* IE9 */
+            }
+
+            textarea{
+                text-transform: uppercase;
+            }
+            textarea{
+                resize:none;
+            }
+         
+	    </style>
+        {% block estilos %}
+        {% endblock%}
+	<!-- Piwik -->
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//estadistica.bva.org.ve/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', 8]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="//estadistica.bva.org.ve/piwik.php?idsite=8" style="border:0;" alt="" /></p></noscript>
+<!-- End Piwik Code -->
+    </head>
+    
+    <body>
+
+        <nav class="navbar navbar-inverse" style="margin-bottom:0">
+            <div  align="center">
+            <h3><span style='margin-left:-100px' class="label">SISTEMA DE REGISTRO Y CONSULTA DE 1x10</span></h3>
+            </div>
+        </nav>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                    <li id='id_base'>
+                        {% if user.is_superuser == True %}
+                            <a href="/menu">Inicio</a>
+                        {% endif %}
+                    </li>
+                    {% if user.is_authenticated %}
+
+                        {% if user.is_superuser == True %}
+                            <li id='id_asig_ubch_clp'>
+                                <a href="{% url 'registro_clpubch' %}">Asignar UBCH a CLP</a>
+                            </li>
+                            <li id='id_uno_jefe_institucion'>
+                                <!--<a href="{% url 'registro_unojefes' %}">1X10 Jefe de CLP, UBCH e Instituciones</a>-->
+                                <a href="{% url 'registro_unojefes' %}">1X10 Jefe de CLP, UBCH</a>
+                            </li>
+                            <li id='id_reg_patrulleros'>
+                                <a href="/patrullero/registro">Registrar Patrullero</a>
+                            </li>
+                            <li id='id_reg_1_x_10'>
+                                <a href="/ubch/registro">Registrar 1X10</a>
+                            </li>
+                            <li id='id_reportes' class="dropdown">
+                                <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Reportes<span class="caret"></span></a>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="{% url 'clpubch' %}">UBCH Asignadas a CLP</a></li>
+                                    <li><a href="{% url 'reporte_patrullero' %}">Jefes de UBCH y sus Patrulleros</a></li>
+                                    <li><a href="{% url 'reporte_unodiez' %}">Patrulleros y su 1X10</a></li>
+                                    <li><a class='reporte_1x10ubch' id="todos" style="cursor:pointer">Cantidad de 1X10 por UBCH</a></li>
+                                    <li><a class='reporte_1x10ubch' id="clp" style="cursor:pointer">Cantidad de 1X10 por CLP</a></li>
+                                    <!--<li><a class='reporte_1x10ubch' id="inst" style="cursor:pointer">Cantidad de 1X10 por Intituci&oacute;n</a></li>-->
+                                </ul>
+                            </li>
+                        {% endif %}
+                        {% if user.datos.grupo_usuario ==  1  %}
+                            <!--<li id='id_reg_listado'>
+                                <a href="{% url 'list_datos' %}">Listado</a>
+                            </li>
+                            <li id='id_reg_milista'>
+                                <a href="{% url 'milista_datos' %}">Mi Lista</a>
+                            </li>
+                            <li id='id_reg_datos'>
+                                <a href="{% url 'registro_datos' %}">Registro</a>
+                            </li>-->
+                            <li id='id_reg_datos'>
+                                <a href="{% url 'registro_datos' %}">Registro</a>
+                            </li>
+                            <li id='id_list_patrullero'>
+                                <a href="{% url 'list_patrulleros' %}">Lista de Patrulleros</a>
+                            </li>
+                            <li id='id_list_carga'>
+                                <a href="{% url 'list_nocarga' %}">Lista de Patrulleros sin 1x10</a>
+                            </li>
+                             <li id='id_list_jefes'>
+                                <a href="{% url 'list_jefes' %}">Lista de Jefes</a>
+                            </li>
+                            <li id='id_rep_datos'>
+                                <a href="{% url 'reporte_datos' %}" target="_blank">Reporte</a>
+                            </li>
+                            <!--<li id='id_rep_patr'>
+                                <a href="{% url 'reporte_patrulleros' %}" target="_blank">Reporte de Patrulleros</a>
+                            </li>
+                            <li id='id_rep_jefesr'>
+                                <a href="{% url 'reporte_jefes' %}" target="_blank">Reporte de Jefes</a>
+                            </li>-->
+                        {% endif %}
+
+                    {% endif %}
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            {% if user.is_authenticated %}
+                            <a href="/logout/">Cerrar sesión: {{ user.datos.p_nombre|default:user }} {{ user.datos.p_apellido }}</a>
+                            {% else %}
+                            <a href="/">Iniciar sesión</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div id="contenedor">
+            {% if user.is_authenticated %}
+                {% block contenido %}
+                    {% if user.is_superuser == True %}
+                        <div id="imagenes" style="text-align: center">
+                             <a href="{% url 'registro_clpubch' %}"><img  class="imagenes img-rounded  animated flipInX" src="{{ STATIC_URL }}img/clp1.jpg"/></a>
+                             &nbsp;&nbsp;&nbsp;&nbsp;
+                             <a href="{% url 'registro_patrullero' %}"><img class="imagenes img-rounded animated flip" src="{{ STATIC_URL }}img/patrulleros1.jpg"/></a>
+                             &nbsp;&nbsp;&nbsp;&nbsp;
+                             <a href="{% url 'registro_uno' %} "><img class="imagenes img-rounded animated rotateIn" src="{{ STATIC_URL }}img/1x101.jpg"/></a>
+                        </div>
+                    {% endif %}
+                {% endblock contenido%}
+            {% endif %}
+        </div>
+        {% if request.path == '/menu/' and user.is_authenticated == True%}
+            <div  style="height: 50%"></div>
+        {% elif request.path == '/menu/' and user.is_authenticated == False%}
+            <div  style="height: 50%"></div>
+        {% elif request.path != '/menu/' and  user.is_authenticated == False%}
+            <div  style="height: 50%"></div>
+        {% endif %}
+        <div id="footer" style="text-align:center;margin-top:3%">
+            <img src="{{ STATIC_URL }}img/footer.png"/>
+        </div>
+    </body>
+<html>

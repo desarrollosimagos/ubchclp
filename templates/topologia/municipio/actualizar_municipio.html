@@ -1,0 +1,42 @@
+
+    {% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+    {% block title %}Actualizar Municipio{% endblock %}
+    
+    {% block contenido %}
+	<form method="post">
+	    {% csrf_token %}
+	    <table>
+		<tr>
+		    <td colspan='2' style='background-color: #D9EDF7'>Actualizar Municipio</td>
+		</tr>
+		<tr>
+		    <td>Codigo</td>
+		    <td><input id="id_cod_municipio" required=True name="cod_municipio" type="number" readonly=True value='{{obj_reg_mun.cod_municipio}}' /></td>
+		</tr>
+		<tr>
+		    <td>Estado</td>
+		    <td>
+			<select id='id_estado' name='estado'>
+			    <option value=''>------------------------</option>
+			    {% for e in lista_estado %}
+				{% if e.cod_estado == obj_reg_mun.estado_id%}
+				    <option value='{{e.cod_estado}}' selected='selected'>{{ e.estado }}</option>
+				{% endif %}
+				{% if not e.cod_estado == obj_reg_mun.estado_id %}
+				    <option value='{{e.cod_estado}}'>{{ e.estado }}</option>
+				{% endif %}
+			   {% endfor %}
+			</select>
+		    </td>
+		</tr>
+		<tr>
+		    <td>Municipio</td>
+		    <td><input id="id_municipio" required=True maxlength="50" name="municipio" type="text" value='{{obj_reg_mun.municipio}}'/></td>
+		</tr>
+		<tr>
+		    <td><input type="submit" value="Actualizar"/></td>
+		</tr>
+	    </table>
+	    
+	</form>
+    {% endblock contenido%}

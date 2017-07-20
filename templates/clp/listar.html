@@ -1,0 +1,66 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+<html>
+<head>
+    <title>CLP</title>
+
+</head>
+
+<body>
+    {% block contenido %}
+    <h1>Listado de Jefes de Circulos Patrioticos{% now " d/m/Y h:i A" %}</h1>
+                
+		<td colspan=3>
+		  <a href='/clp/data'>
+		    	{% if user.username == "admin" %}
+		    	<button>Importar CLP</button>
+			{% endif %}
+		  </a></td>
+     <table width="1210" border="1" cellpadding="1" cellspacing="0" bordercolor="#000000" align="center">
+	      <tr style='background-color: #D9EDF7;text-align: center;'>
+		<td>N&deg;</td>
+	        <td>Cedula</td>
+                <td>Nombres</td>
+                <td>Sexo</td>
+                <td>edad</td>
+                <td>Telefono</td>
+                <td>Nombre agrupacion</td>
+		<td>codigo circulo</td> 
+              </tr>
+	    {% for m in listar_clp %}
+	      <tr style='text-align: center;'>
+	
+              <tr>
+		<td>{{forloop.counter}}</td>
+                <td>{{m.nac}}- {{m.cedula}}</td>
+                <td>{{m.nombres}}</td>
+                <td>{{m.sexo}}</td>
+                <td>{{m.edad}}</td>
+                <td>{{m.telefono}}</td>
+                 <td>{{m.nomb_centro}}</td>
+		  <td>{{m.cod_circulo}}</td>
+              </tr>
+            {% empty %}
+	      <tr style='text-align: center;'>
+		<td colspan=2>No hay registros</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+    {% if is_paginated %}
+    <div class="pagination" align="center">
+        <span class="page-links">
+            {% if page_obj.has_previous %}
+                <a href="/clp/listar/?page={{ page_obj.previous_page_number }}">Anterior</a>
+            {% endif %}
+            <span class="page-current">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="/clp/listar/?page={{ page_obj.next_page_number }}">Siguiente</a>
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+    {% endblock contenido%}
+</body>
+</html>
+

@@ -1,0 +1,146 @@
+{% extends "base/base.html" %}
+    
+    {% block cssfile %}
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    {% block jsfile %}
+    <script src="{{STATIC_URL}}js/apprise.js"></script>
+    <script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    <script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block scripti %}
+    <!--  Bloque template para grupos templatag_grupos-->
+	{% load templatag_grupos %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+	    $("#id_reg_listado").attr('class','active');
+		
+		$('input:text,textarea').val('');
+		$('#cedula_jefe').focus().attr('maxlength','10');
+		$('textarea').val(function () {
+		    return this.value.toUpperCase();
+		});
+
+		var entero = "0123456789";
+		$('#cedula_jefe,#cedula,#telefono,#cedula_new,#telefono_new').validar(entero);
+		var TUbch = $('#tabla_ubch').dataTable({
+		    "iDisplayLength": 12,
+		    "iDisplayStart": 0,
+		    "sPaginationType": "full_numbers",
+		    "aLengthMenu": [12, 20, 30, 40, 50],
+		    "oLanguage": {"sUrl": "/static/js/es.txt"},
+		    
+		    "aoColumns": [
+                {"sClass": "control", "sWidth": "4%"},
+                {"sClass": "right", "sWidth": "4%"},
+                {"sClass": "left", "sWidth": "28%"},
+                {"sClass": "left", "sWidth": "4%"},
+                {"sClass": "left", "sWidth": "40%"},
+                {"sClass": "center", "sWidth": "10%"},
+		    ]
+		});
+    
+		//var url = 'www.registro1x10.org.ve'
+	    var url = "localhost:8000"
+
+	    });
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	.oculto{
+	    display: none
+	}
+        .pagination{
+            margin: 5px 0 !important;
+        }
+	table.dataTable th,table.dataTable td {
+	    white-space: nowrap;
+        }
+	
+	#divmodulo {
+	    -moz-animation-duration: 3s;
+	    -webkit-animation-duration: 3s;
+	    -op-animation-duration: 3s;
+	}
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+	#nombres_new{
+	    text-transform: uppercase
+	}
+
+    input[type="search"] {
+        width: 400px !important;
+    }
+    </style>
+    {% endblock%}
+    {% block contenido %}
+   <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+        <span style="font-size: 16px;font-weight: bold;">Registro de 1X10</span>
+    </div>
+	<div class="panel-body">
+	    <div id="div_lista" style="width:100%;">
+		<fieldset>
+		     <legend class="titulo">Listado de Personas::</legend>
+		     <br/>
+		     <br/>
+			 <table style="width:100%;" border="0" align="center" class="tablas table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+			     <thead>
+				 <tr class="info">
+
+                     <th>N&deg;</th>
+				     <th>Cedula</th>
+				     <th>Nombres</th>
+				     <th>Telefono</th>
+				     <th>Departamento</th>
+					 <th>Agregar</th>
+				 </tr>
+			     </thead>
+			     <tbody>
+                 {% for dato in listado %}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>
+                            {{dato.cedula}}
+                        </td>
+                        <td>
+                            {{dato.p_nombre}} {{dato.s_nombre|default:""}} {{dato.p_apellido}} {{dato.s_apellido|default:""}}
+                        </td>
+                        <td>
+                            {{dato.telefono}}
+                        </td>
+                        <td>
+                            {{dato.departamento}}
+                        </td>
+						<td>
+							<a href="{% url 'detail_datos' dato.id %}">
+								<img class="search"  style="width:24px;height:24px;cursor:pointer"  src="/static/img/search1.png" />
+							</a>
+
+						</td>
+                    </tr>
+                 {% endfor %}
+			     </tbody>
+			 </table>
+		</fieldset>
+	   </div>
+	    <br/>
+	    <br/>
+	    <br/>
+       </div>
+   </div>
+{% endblock %}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+<html>
+<head>
+    <title>UBCH</title>
+
+</head>
+
+<body>
+    {% block contenido %}
+    <h1>Listado de UBCH</h1>
+		<td colspan=3>
+		  <a href='/ubch/data'>
+		    {% if user.username == "admin" %}
+		    	<button>Importar UBCH</button>
+			{% endif %}
+		  </a>
+		</td>
+   <table width="1210" border="1" cellpadding="1" cellspacing="0" bordercolor="#000000" align="center">
+	      <tr style='background-color: #D9EDF7;text-align: center;'>
+	                  
+                <td>Cédula</td>
+                <td>Nombre</td>
+                <td>Cargo</td>
+		<td>Nombre UBCH</td>
+          
+	      </tr>
+              {% for m in listar_ubch %}
+              <tr>
+                <td>{{m.nac}}- {{m.cedula}}</td>
+                <td>{{m.nombre}}</td>
+                <td>{{m.cargo}}</td>
+		<td>{{m.nom_ubch}}</td>
+              </tr>
+            {% empty %}
+	      <tr style='text-align: center;'>
+		<td colspan=2>No hay registros</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+    {% if is_paginated %}
+    <div class="pagination" align="center">
+        <span class="page-links">
+            {% if page_obj.has_previous %}
+                <a href="/ubch/listar/?page={{ page_obj.previous_page_number }}">Anterior</a>
+            {% endif %}
+            <span class="page-current">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="/ubch/listar/?page={{ page_obj.next_page_number }}">Siguiente</a>
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+    {% endblock contenido%}
+</body>
+</html>
+

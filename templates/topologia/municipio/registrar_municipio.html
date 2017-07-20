@@ -1,0 +1,35 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+    {% block title %}Registrar Municipio{% endblock %}
+    
+    {% block contenido %}
+	<form method="post">
+	    {% csrf_token %}
+	    <table>
+		<tr>
+		    <td colspan='2' style='background-color: #D9EDF7'>Registrar Municipio</td>
+		</tr>
+		<tr>
+		    <td>Codigo</td>
+		    <td><input type='number' required=True id='cod_municipio' name='cod_municipio'></td>
+		</tr>
+		<tr>
+		    <td>Estado</td>
+		    <td>
+			<select id='id_estado' name='estado'>
+			    <option value=''>------------------------</option>
+			    {% for est in lista_estado %}
+				<option value='{{est.cod_estado}}'>{{est.estado}}</option>
+			    {% endfor %}
+			</select>
+		    </td>
+		</tr>
+		<tr>
+		    <td>Municipio</td>
+		    <td><input type='text' required=True id='municipio' name='municipio'></td>
+		</tr>
+		<tr>
+		    <td><input type="submit" value="Registrar"/></td>
+		</tr>
+	    </table>
+	</form>
+    {% endblock contenido%}

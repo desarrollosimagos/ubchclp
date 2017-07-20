@@ -1,0 +1,188 @@
+{% extends "base/base.html" %}
+
+    {% block cssapprise %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    {% endblock  %}
+    {% block cssbootstraptable %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    {% endblock  %}
+    {% block cssbootstraptableresponsive %}
+	<!--<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">-->
+    {% endblock  %}
+    {% block cssestilo %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    
+    {% block scriptapprise %}
+	<script src="{{STATIC_URL}}js/apprise.js"></script>
+    {% endblock  %}
+    {% block scriptdatatable %}
+	<script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    {% endblock  %}
+    {% block scriptdatatableresponsive %}
+	<!--<script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>-->
+    {% endblock  %}
+    {% block scriptdatatableboostrap %}
+        <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    {% endblock  %}
+    {% block scriptvalidar %}
+	<script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block script %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+	    $("#id_reportes").attr('class','active');
+		$('input:text').val('');
+		$('#cedula_jefe').focus().attr('maxlength','10')
+				
+		$('#buscar_patru').click(function(){
+		    
+		    var $cedula = $('#cedula_jefe')
+		    
+		    $('div#div_registro').slideUp(1000);
+		    $('div#div_lista').slideDown(1000);
+		    
+		    if( !$(".appriseInner").is(":visible") == true){ 
+				if ($cedula.val() === null || $cedula.val().length === 0 || /^\s+$/.test($cedula.val())) {
+						apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de  C&eacute;dula</span>', {'textOk': 'Aceptar'}, function() {
+						$cedula.parent('div').addClass('has-error')
+						$cedula.focus()
+					});
+				}else{
+					$.post("{%url 'registro_uno' %}",{'cedula':$cedula.val(),'csrfmiddlewaretoken': "{{ csrf_token }}",'accion':'buscar'}, function(data) {
+						if (data['existe'] == 'no') {
+							apprise('<span style="color:#FF0000;font-weight:bold">Esta n&uacute;mero de C&eacute;dula no esta registrada como un patrullero</span>', {'textOk': 'Aceptar'}, function() {
+								$('#cedula_jefe').parent('div').addClass('has-error')
+								$('#cedula_jefe').focus().select()
+								$('#nombre_patru,#apellido_patru,#telefono_patru,#twitter_patru').val('')
+								$('#div_nuevo').css('display','none');
+								$('div#div_registro').slideUp(1000);
+								$('div#div_lista').slideDown(1000);
+							});
+						}else{
+							$('#nombre_patru').val(data[0].p_nombre + ' '+ data[0].s_nombre)
+							$('#apellido_patru').val(data[0].p_apellido+ ' '+ data[0].s_apellido)
+							$('#telefono_patru').val(data[0].telefono)
+							$('#twitter_patru').val(data[0].twitter)
+							$('#div_nuevo').css('display','block');
+						}
+					},'json')
+				}
+		    }
+		    
+		})
+
+		$(document).on('keypress', function(e) {
+		    var code = (e.which) ? e.which : e.keyCode
+		    if (code == 13) {
+			$('#buscar_patru').trigger('click');
+		    }
+		});
+		
+		
+		$('#reporte').click(function(){
+		    var $cedula = $('#cedula_jefe')
+		    var $telefono = $('#telefono')
+		    var $twitter = $('#twitter')
+		    if( !$(".appriseInner").is(":visible") == true){ 
+				if ($cedula.val() === null || $cedula.val().length === 0 || /^\s+$/.test($cedula.val())) {
+				}else{
+					url = '../reporte/'+$cedula.val()
+                    window.open(url)
+				}
+		    }
+		    
+		});
+
+		$('#cancelar').click(function(){
+		    $('#cedula,#telefono,#twitter,#p_nombre,#s_nombre,#p_apellido,#s_apellido,#cod_ubch,#ubch').val('')
+		});
+		
+
+	    });
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	.oculto{
+	    display: none
+	}
+	#tbljefe{
+	    font-size: 13px;
+	}
+	#divmodulo {
+	    -moz-animation-duration: 3s;
+	    -webkit-animation-duration: 3s;
+	    -op-animation-duration: 3s;
+	}
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+    </style>
+    {% endblock%}
+    {% block contenido %}
+	<div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+	    <div class="panel-heading " style="font-weight: bold;font-size: 12px;"><span style="font-size: 16px;font-weight: bold;">Registro de 1X10</span></div>                   
+	    <div class="panel-body">
+			<form id="frmregistro">
+				<fieldset><legend class="titulo">Datos del Patrullero::</legend></fieldset> 
+				<br/>
+				<br/>
+				<div class="form-inline col-xs-3"></div>
+				<div class="form-group col-xs-6">			
+				<div class="input-group">
+					<input  type="text" placeholder="C&eacute;dula" id="cedula_jefe" name="cedula_jefe" class="form-control input-sm" />
+					<input type="hidden" id="h_ced_jefe" value="false"/>
+					<span class="input-group-btn ">
+					<button style="font-size: 12px;" type="button" id="buscar_patru" class="btn btn-primary btn-sm">
+						Buscar
+						<!--<span class="glyphicon glyphicon-search "></span>-->
+					</button>
+					</span>
+				</div>
+				</div>
+				<br/>
+				<br/>
+				<br/>
+				<div class="form-inline">
+				<div class="form-group col-xs-6">
+					<label>Nombre:&nbsp;&nbsp;</label>
+					<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_patru" name="nombre_patru" class="form-control input-sm" placeholder="Nombre">                           
+				</div>
+				<div class="form-group col-xs-6">
+					<label>Apellido:</label>
+					<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="apellido_patru" name="apellido_patru" class="form-control input-sm" placeholder="Apellido"> 
+				</div>                        
+				</div>
+				<br/>
+				<br/>
+				<br/>                    
+				<div class="form-inline">
+				<div class="form-group col-xs-6">
+					<label>Tel&eacute;fono:</label>
+					<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="telefono_patru" name="telefono_patru" class="form-control input-sm" placeholder="Tel&eacute;fono"> 
+				</div>
+				<div class="form-group col-xs-6">
+					<label>Twitter:&nbsp;&nbsp;</label>
+					<input  style="width: 75%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="twitter_patru" name="twitter_patru" class="form-control input-sm" placeholder="Twitter"> 
+				</div>
+				</div>
+				<br/>
+				<br/>
+				<br/>
+				<div class="row" style="text-align:center;">
+					<input style="margin: 0 auto" class="btn btn-primary btn-sm" type="button" id="reporte" value="Ver Reporte"/>
+					&nbsp
+					<input class="btn btn-primary btn-sm" type="button" id="cancelar" value="Cancelar"/>
+				</div>
+			</form>
+		</div>                 
+    </div>
+{% endblock %}

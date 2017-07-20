@@ -1,0 +1,170 @@
+{% extends "base/base.html" %}
+
+{% block cssapprise %}
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+{% endblock  %}
+
+
+{% block cssestilo %}
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+{% endblock  %}
+{% block scriptapprise %}
+<script src="{{STATIC_URL}}js/apprise.js"></script>
+{% endblock  %}
+{% block scriptvalidar %}
+<script src="{{STATIC_URL}}js/validarcampos.js"></script>
+{% endblock  %}
+
+{% block script %}
+<script type="text/javascript">
+$(document).ready(function () {
+        $("#id_reportes").attr('class','active');
+        var entero = "0123456789"
+        $('#codigo_clp').validar(entero);
+        
+        //var url = 'localhost:8000'
+	var url = 'www.registro1x10.org.ve';
+        $('#buscar_jefe').click(function () {
+            var codigo_clp = $('#codigo_clp')
+            if( !$(".appriseInner").is(":visible") == true){ 
+                if (codigo_clp.val() === null || codigo_clp.val().length === 0 || /^\s+$/.test(codigo_clp.val())) {
+                    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el C&oacute;digo del CLP</span>', {'textOk': 'Aceptar'}, function () {
+                        cod_ubch.parent('div').addClass('has-error');
+                        cod_ubch.focus();
+                    });
+                } else {
+                    $.get("http://" + url + "/clp/codigo=" + codigo_clp.val(), function (data) {
+
+                        $('#cedula').val(data[0]['cedula'])
+                        $('#nombre').val(data[0]['nombres'])
+                        $('#telefono').val(data[0]['telefono'])
+                        $('#cv').val(data[0]['nomb_centro'])
+			
+                    }, 'json')
+                        .error(function (datos) {
+                            apprise('<span style="color:#FF0000;font-weight:bold">Este C&oacute;digo no pertenece a un CLP</span>', {'textOk': 'Aceptar'}, function () {
+                                codigo_clp.parent('div').addClass('has-error')
+                                codigo_clp.focus().select()
+                                $('#nombre_jefe').val('')
+                                $('#cod_ubch_jefe').val('')
+                                $('#ubch_jefe').val('')
+                                $('#add.nuevo').css('display', 'none');
+                                $('div#div_registro').slideUp(1000);
+                                $('div#div_lista').slideDown(1000);
+                            });
+                        });
+                }
+            }
+        })
+    
+        $('#reporte').click(function () {
+            var codigo_clp = $('#codigo_clp')
+            if( !$(".appriseInner").is(":visible") == true){ 
+                if (codigo_clp.val() === null || codigo_clp.val().length === 0 || /^\s+$/.test(codigo_clp.val())) {
+                    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el C&oacute;digo del CLP</span>', {'textOk': 'Aceptar'}, function () {
+                        cod_ubch.parent('div').addClass('has-error');
+                        cod_ubch.focus();
+                    });
+                } else {
+                    url = 'http://'+url+'/clpubch/reporte/'+codigo_clp.val()
+                    window.open(url)
+                }
+            }
+        })
+        
+        
+        $(document).on('keypress', function (e) {
+            var code = (e.which) ? e.which : e.keyCode
+            if (code == 13) {
+                var ced_jefe = $('#h_ced_jefe').val()
+                var cod_ubch = $('#h_cod_ubch').val()
+                if (ced_jefe == 'true') {
+                    $('#buscar_jefe').trigger('click');
+                } else if (cod_ubch == 'true') {
+                    $('#buscar_ubch').trigger('click');
+                }
+            }
+        });
+    
+    
+        $('#cancelar').click(function () {
+            $('div#div_registro').slideUp(1000);
+            $('div#div_lista').slideDown(1000);
+            $('#cod_ubch,#ubch').val('')
+            $('#add').css('display', 'block');
+        });
+
+    });
+
+</script>
+{% endblock  %}
+{% block estilos %}
+<style>
+    .titulo{
+        color: #1b809e;
+        padding: 0;
+        margin: 0 auto;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+{% endblock%}
+{% block contenido %}
+    <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 70%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+            <span style="font-size: 16px;font-weight: bold;">
+                Reporte de UBCH asignadas a un CLP
+            </span>
+        </div>
+	<div class="panel-body">
+	    <form id="frmregistro">
+		{% csrf_token %}
+		<fieldset>
+		    <legend class="titulo">Datos del CLP::</legend>
+		    <br/>
+		    <div style="margin: 0 auto;width:50%" class="form-group">
+			<label>C&oacute;digo:</label>&nbsp;
+			<div class="input-group">
+			    <input  type="text" placeholder="C&oacute;digo" id="codigo_clp" name="codigo_clp" class="form-control input-sm" />
+			    <input type="hidden" id="h_ced_jefe" value="false"/>
+			    <span class="input-group-btn ">
+				<button style="font-size: 12px;" type="button" id="buscar_jefe" class="btn btn-primary input-sm">
+				    Buscar
+				    <!--<span class="glyphicon glyphicon-search "></span>-->
+				</button>
+			    </span>
+			</div>
+		    </div>
+		    <br/>
+		    <div style="width:50%;margin: 0 auto" class="form-group">
+			<label>C&eacute;dula del Jefe del CLP:</label>
+			<input  style="background-color:#FFFFFF;color:#000000" disabled="disabled" id="cedula" name="cedula" class="form-control input-sm" placeholder="C&eacute;dula"/>
+		    </div>
+		    <br/>
+		    <div style="width:50%;margin: 0 auto" class="form-group">
+			<label>Nombre del Jefe del CLP:</label>
+			<input style="background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre" name="nombre" class="form-control input-sm" placeholder="Nombre"/>
+		    </div>
+		    <br/>
+		    <div style="width:50%;margin: 0 auto" class="form-group">
+			<label>Tel&eacute;fono del Jefe del CLP:</label>
+			<input style="background-color:#FFFFFF;color:#000000" disabled="disabled" id="telefono" name="telefono" class="form-control input-sm" placeholder="Nombre"/>
+		    </div>
+		    <br/>
+		    <div style="width:50%;margin: 0 auto" class="form-group">
+			<label>Centro de Votaci&oacute;n del CLP:</label>
+			<input style="background-color:#FFFFFF;color:#000000" disabled="disabled" id="cv" name="cv" class="form-control input-sm" placeholder="Nombre"/>
+		    </div>
+                    <br/>
+                    <div class="row" style="text-align:center;">
+                        <input style="margin: 0 auto" class="btn btn-primary btn-sm" type="button" id="reporte" value="Ver Reporte"/>
+                        &nbsp
+                        <input class="btn btn-primary btn-sm" type="button" id="cancelar" value="Cancelar"/>
+                    </div>
+		</fieldset>
+	    </form>
+	</div>
+    </div>
+</div>
+{% endblock%}

@@ -1,0 +1,151 @@
+{% extends "base/base.html" %}
+    
+    {% block cssfile %}
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    {% block jsfile %}
+    <script src="{{STATIC_URL}}js/apprise.js"></script>
+    <script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    <script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block scripti %}
+    <!--  Bloque template para grupos templatag_grupos-->
+	{% load templatag_grupos %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+	    $("#id_reg_listado").attr('class','active');
+		
+		$('input:text,textarea').val('');
+		$('#cedula_jefe').focus().attr('maxlength','10');
+		$('textarea').val(function () {
+		    return this.value.toUpperCase();
+		});
+
+		var entero = "0123456789";
+		$('#cedula_jefe,#cedula,#telefono,#cedula_new,#telefono_new').validar(entero);
+		var TUbch = $('#tabla_ubch').dataTable({
+		    "iDisplayLength": 10,
+		    "iDisplayStart": 0,
+		    "sPaginationType": "full_numbers",
+		    "aLengthMenu": [10, 20, 30, 40, 50],
+		    "oLanguage": {"sUrl": "/static/js/es.txt"},
+		    
+		    "aoColumns": [
+                {"sClass": "right", "sWidth": "4%"},
+                {"sClass": "right", "sWidth": "4%"},
+                {"sClass": "left", "sWidth": "40%"},
+                {"sClass": "left", "sWidth": "40%"},
+                {"sClass": "center", "sWidth": "4%"},
+		    ]
+		});
+    
+		//var url = 'www.registro1x10.org.ve'
+	    var url = "localhost:8000"
+
+		$('#listar').click(function(){
+		var url = '/datos/reporte_patrulleros/'
+			window.open(url)
+		})
+
+	    });
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	.oculto{
+	    display: none
+	}
+        .pagination{
+            margin: 5px 0 !important;
+        }
+	table.dataTable th,table.dataTable td {
+	    white-space: nowrap;
+        }
+	
+	#divmodulo {
+	    -moz-animation-duration: 3s;
+	    -webkit-animation-duration: 3s;
+	    -op-animation-duration: 3s;
+	}
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+	#nombres_new{
+	    text-transform: uppercase
+	}
+
+    input[type="search"] {
+        width: 400px !important;
+    }
+    </style>
+    {% endblock%}
+    {% block contenido %}
+   <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+        <span style="font-size: 16px;font-weight: bold;">Listado</span>
+    </div>
+	<div class="panel-body">
+	    <div id="div_lista" style="width:100%;">
+		<fieldset>
+		     <legend class="titulo">Patriotas BVA 200</legend>
+		     <br/>
+		     <br/>
+			 <table style="width:100%;" border="0" align="center" class="tablas table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+			     <thead>
+				 <tr class="info">
+
+                     <th>N&deg;</th>
+				     <th>Cedula</th>
+				     <th>Nombres</th>
+				     <th>Cargo</th>
+					 <th>Ver</th>
+				 </tr>
+			     </thead>
+			     <tbody>
+                 {% for dato in listado %}
+                    <tr>
+                        <td>{{forloop.counter}}</td>
+                        <td>
+                            {{dato.datos__cedula}}
+                        </td>
+                        <td>
+                            {{dato.datos__p_nombre}} {{dato.datos__s_nombre|default:""}} {{dato.datos__p_apellido}} {{dato.datos__s_apellido|default:""}}
+                        </td>
+                        <td>
+                            {{dato.datos__cargo}}
+                        </td>
+						<td>
+							<a href="{% url 'reporte_detallado' dato.datos__usuario_id %}" target="_blank">
+								<img class="search"  style="width:24px;height:24px;cursor:pointer"  src="/static/img/search1.png" />
+							</a>
+
+						</td>
+                    </tr>
+                 {% endfor %}
+			     </tbody>
+			 </table>
+			 <div class="col-lg-12" style="text-align:center">
+				<div style="padding:3px" class="form-group col-xs-12">
+					<button class="btn btn-success" id="listar" type="button"> Ver en PDF </button>
+				</div>
+			 </div>
+		</fieldset>
+	   </div>
+	    <br/>
+	    <br/>
+	    <br/>
+       </div>
+   </div>
+{% endblock %}

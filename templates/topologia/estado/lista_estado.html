@@ -1,0 +1,72 @@
+{% extends "base/base.html" %} <!-- Heredando (Bloque) plantilla index -->
+	{% block title %}Lista de Estados{% endblock title%}
+	{% if form.non_field_errors %}
+	<div class="panel">
+	  {{ form.non_field_errors }}
+	</div>
+	{% endif %}
+
+	{% block contenido %}
+	<!-- ************************************************************* -->
+	{{sms}}
+	    <table style='width: 35em;'>
+	       <tr>
+                <h1>Listado de Estados</h1>
+                 <tr>
+	      <tr>
+		<td colspan=3>
+		  <a href='/estado/data'>
+		  	{% if user.username == "admin" %}
+		    	<button>Importar Estados</button>
+		    {% endif %}
+		  </a>
+		</td>
+	      </tr>
+	      <tr>
+	      <td style='text-align: left' colspan='4'>
+		  <a href="/estado/registrar_estado" title='Nuevo'>  
+		    Registrar Estado
+		  </a>
+		</td>
+	      <tr style='background-color: #D9EDF7;text-align: center;'>
+	    <td width='10px;'>Item</td>
+		<td>Estado</td>
+		<td colspan=2>Acción</td>
+	      </tr>
+	      {% for e in lista_estados  %}
+	      <tr style='text-align: center;'>
+	    <td>{{e.id}}</td>
+		<td>{{ e.estado }}</td>
+		<td>
+		  <a href='{% url "actualizar_estado" e.id %}'>
+		    <img src='../../static/admin/img/icon_changelink.gif' title='Editar'>
+		  </a>
+		</td>
+		<td>
+		  <a onclick="eliminar_data('{{e.id}}','/estado/eliminar_estado/')">
+		    <img src='../../static/admin/img/icon_deletelink.gif' title='Eliminar'>
+		  </a>
+		</td>
+	      </tr>
+	      {% empty %}
+	      <tr style='text-align: center;'>
+		<td colspan=2>No se encuentran registros</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+	    <div class="pagination" style='margin-left: 15em;'>
+	    <span class="step-links">
+	      {% if lista_estados.has_previous %}
+		<a href="?page={{ lista_estados.previous_page_number }}">Anterior</a>
+	      {% endif %}
+	    <span class="current">
+	      Página {{ lista_estados.number }} de {{ lista_estados.paginator.num_pages }}.
+	    </span>
+	    {% if lista_estados.has_next %}
+	      <a href="?page={{ lista_estados.next_page_number }}">Siguiente</a>
+	    {% endif %}
+	    </span>
+	    </div>
+	    
+	{% endblock contenido%}
+	<!-- ************************************************************* -->

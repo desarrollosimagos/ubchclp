@@ -1,0 +1,9 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+    {% block title %}Eliminar Estado{% endblock %}
+    
+    {% block contenido %}
+	<form method="post">{% csrf_token %}
+		¿ Esta seguro que desea eliminar el registro "{{ object }}"?
+		<input type="submit" value="Eliminar" />
+	</form>
+	{% endblock contenido%}

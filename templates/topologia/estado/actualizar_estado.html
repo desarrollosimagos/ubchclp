@@ -1,0 +1,31 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+    {% block title %}Actualizar Estado{% endblock %}
+    
+    {% block contenido %}
+    
+	<form method="post">
+	    {% csrf_token %}
+	    <table style="text-align:center;">
+		 <tr>
+                <h1>Actualizar Estado</h1>
+                 <tr>
+	    	<tr>
+	    		<td colspan="2" style='background-color: #D9EDF7'>
+	    			Actualizar estado
+	    		</td>
+	    	</tr>
+	    	<tr>
+	    		<td>Cod estado</td>
+	    		<td><input type='number' required id="id_cod_estado" name="cod_estado" value='{{obj_regestado.cod_estado}}'/></td>
+	    	</tr>
+	    	<tr>
+	    		<td>Estado</td>
+	    		<td><input id="id_estado" required maxlength="50" name="estado" type="text" value='{{obj_regestado.estado}}'/>
+	    		</td>
+	    	</tr>
+	    	<tr>
+	    		<td><input type="submit" value="Actualizar"/></td>
+	    	</tr>
+	    </table>
+    </form>
+    {% endblock contenido%}

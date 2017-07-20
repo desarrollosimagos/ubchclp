@@ -1,0 +1,177 @@
+{% extends "base/base.html" %}
+
+    {% block cssapprise %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    {% endblock  %}
+    {% block cssbootstraptable %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    {% endblock  %}
+    {% block cssbootstraptableresponsive %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+    {% endblock  %}
+    {% block cssestilo %}
+	<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    
+    {% block scriptapprise %}
+	<script src="{{STATIC_URL}}js/apprise.js"></script>
+    {% endblock  %}
+    {% block scriptdatatable %}
+	<script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    {% endblock  %}
+    {% block scriptdatatableresponsive %}
+	<script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+    {% endblock  %}
+    {% block scriptdatatableboostrap %}
+        <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    {% endblock  %}
+    {% block scriptvalidar %}
+	<script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block script %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+		var TUbch = $('#tabla_ubch').dataTable({
+		    "iDisplayLength": 10,
+		    "iDisplayStart": 0,
+		    "sPaginationType": "full_numbers",
+		    "aLengthMenu": [12, 20, 30, 40, 50],
+		    "oLanguage": {"sUrl": "/static/js/es.txt"},		    
+		    "aoColumns": [			
+			{"sClass": "right", "sWidth": "5%"},
+			{"sClass": "right", "sWidth": "5%"},
+			{"sClass": "left", "sWidth": "40%"},
+			{"sClass": "left", "sWidth": "40%"},
+			{"sClass": "right", "sWidth": "10%"},			
+		    ]
+		});    
+		$('#imprimir').on('click', function() {
+		    cedula = $('#cedula').val();
+		    
+		    var url = "../reporte/"+cedula;
+		    window.open(url)
+		})
+	    });
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	
+        .pagination{
+            margin: 5px 0 !important;
+        }
+	table.dataTable th,table.dataTable td {
+	    white-space: nowrap;
+        }
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+    </style>
+    {% endblock%}
+    {% block contenido %}
+   <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+	    <span style="font-size: 16px;font-weight: bold;">Listado de Uno por Diez</span>
+	</div>
+	<div class="panel-body">
+	     <fieldset>
+		<legend class="titulo">Datos del Patrullero::</legend>
+		<br/>
+		<br/>
+	        {% for m in patrullero %}
+		    <div class="form-inline">
+			<div class="form-group col-xs-6">
+			    <label>C&eacute;dula:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+			    <input  value="{{m.cedula}}" style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="cedula" name="cedula" class="form-control input-sm" placeholder="Primer Nombre">                           
+			</div>
+			<div class="form-group col-xs-6">
+			    <label>Nombres:</label>
+			    <input  value="{{m.p_nombre}} {{m.s_nombre | default:''}}" style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombres" name="nombres" class="form-control input-sm" placeholder="Primer Nombre">                           
+			</div>			                  
+		    </div>
+		    <br/>
+		    <br/>
+		    <br/>
+		    <div class="form-inline">
+			<div class="form-group col-xs-6">
+			    <label>Apellidos:</label>
+			    <input  value="{{m.p_apellido}} {{m.s_apellido | default:''}}" style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="apellidos" name="apellidos" class="form-control input-sm" placeholder="Primer Nombre">                           
+			</div>
+			<div class="form-group col-xs-6">
+			    <label>Tel&eacute;fono:&nbsp;&nbsp;</label>
+			    <input  value="{{m.telefono}}" style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="p_nombre" name="p_nombre" class="form-control input-sm" placeholder="Primer Nombre">                           
+			</div>
+		    </div>
+		    <br/>
+		    <br/>
+		    <br/>		    
+		    <div class="form-inline">
+			<div class="form-group col-xs-12">
+			    <label>Direcci&oacute;n:</label>
+			    <textarea class="form-control input-sm" disabled="disabled" style="width: 93%;background-color:#FFFFFF;color:#000000;resize: none" id="direccion" maxlength="150" name="direccion" rows="2">{{m.direccion.strip}}</textarea>
+			</div>
+		    </div>
+		    
+		{% endfor %}
+	    </fieldset>
+	    <br/>
+	    <div class="form-inline">
+		<div class="form-group col-xs-12" style="text-align:center;">
+		 <input style="margin:  auto;" class="btn btn-primary btn-sm" type="button" id="imprimir" value="Imprimir"/>
+	    </div>
+	    </div>
+	    <br/>
+	    <br/>
+	    <br/>
+	    <div class="form-inline">
+		<table style="width:100%;" border="0" align="center" class="table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+		    <thead>
+			<tr class="info">
+			    <th>N&deg;</th>
+			    <th>
+				C&eacute;dula
+			    </th>
+			    <th>
+				Nombres
+			    </th>
+			    <th>
+				Apellidos
+			    </th>
+			    <th>
+				Tel&eacute;fono
+			    </th>
+			</tr>
+		    </thead>
+		    <tbody>
+			{% for n in listado %}
+			    <tr>
+			        <td>{{ forloop.counter }}</td>
+				    <td>
+				        {{ n.cedula }}
+				    </td>
+				    <td>
+				        {{ n.p_nombre }} {{ n.s_nombre|default:'' }}
+				    </td>
+				    <td>
+				        {{ n.p_apellido }} {{ n.s_apellido|default:'' }}
+				    </td>
+				    <td>
+				        {{ n.telefono }}
+				    </td>
+			    </tr>
+			    
+			{% endfor %}
+		    </tbody>
+		</table>
+	    </div>
+	</div>
+       </div>
+   </div>
+{% endblock %}

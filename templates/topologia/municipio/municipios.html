@@ -1,0 +1,13 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+    {% block title %}Registrar Estado{% endblock %}
+    
+    {% block contenido %}
+	<form method="post">
+	    {% csrf_token %}
+	    {{form.as_p}}
+	    <input type="submit" value="Registrar"/>
+	</form>
+    <a href='/municipio/data'>
+	<button>Exportar Municipios</button>
+    </a>
+    {% endblock contenido%}

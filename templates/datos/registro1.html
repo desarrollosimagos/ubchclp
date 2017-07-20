@@ -1,0 +1,263 @@
+{% extends "base/base.html" %}
+    
+    {% block cssfile %}
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    {% block jsfile %}
+    <script src="{{STATIC_URL}}js/apprise.js"></script>
+    <script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    <script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block scripti %}
+    <!--  Bloque template para grupos templatag_grupos-->
+	{% load templatag_grupos %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+			$("#id_reg_datos").attr('class','active');
+
+
+			var TUbch = $('#tabla_ubch').dataTable({
+				"bPaginate": false,
+				"bLengthChange": false,
+				"bInfo": false,
+				"bFilter": false,
+				"bSearchable": false,
+				"bSort": false,
+				"bStateSave": true,
+				"bAutoWidth": false,
+				"oLanguage": {"sUrl": "/static/js/es.txt"},
+
+				"aoColumns": [
+					{"sClass": "right", "sWidth": "4%"},
+					{"sClass": "right", "sWidth": "4%"},
+					{"sClass": "left", "sWidth": "28%"},
+					//{"sClass": "left", "sWidth": "4%"},
+					//{"sClass": "left", "sWidth": "40%"},
+				]
+			});
+
+			//var url = 'www.registro1x10.org.ve'
+			var url = "localhost:8000"
+
+			$('#guardar').click(function(){
+
+                if($('#cedula').val() == ''){
+                    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de c&eacute;la</span>', {'textOk': 'Aceptar'}, function() {
+					    $('#cedula').parent('div').addClass('has-error')
+					    $('#cedula').focus().select()
+					});
+			    }else{
+                    var id_emp = $('#id').val();
+                    $.post("/datos/registro/", {id_emp:id_emp,'csrfmiddlewaretoken': "{{ csrf_token }}"}, function(response){
+                        if (response['success'] == 'ok') {
+                            apprise('<span style="color:#059102;font-weight:bold">Añadido a su lista</span>', {'textOk': 'Aceptar'}, function() {
+                                $('#cedula, #nombre,#apellido,#id').val('')
+                                window.location = '/datos/registro/'
+                            });
+                        }else if(response.culminado == 'ok'){
+                            apprise('<span style="color:#059102;font-weight:bold">Ya ha termiado decargar su lista de 1X10,</span><br/>&nbsp;&nbsp;&nbsp;<span style="color:#FF0000;font-weight:bold;text-align:center"> Su usuario sera deshabilitado</span>', {'textOk': 'Aceptar'}, function() {
+                                $('#cedula, #nombre,#apellido,#id').val('')
+                                window.location = '/'
+                            });
+                        }else{
+                            apprise('<span style="color:#FF0000;font-weight:bold">No puede agregar mas personas a su lista</span>', {'textOk': 'Aceptar'}, function() {
+                                //window.location = '/datos/listar/'
+                            });
+                        }
+                    })
+				}
+			})
+
+			$('#buscar').click(function(){
+				var cedula = $('#cedula').val();
+				$('#nombre,#apellido,#id').val('')
+                if(cedula == ''){
+                    apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de c&eacute;la</span>', {'textOk': 'Aceptar'}, function() {
+					    $('#cedula').parent('div').addClass('has-error')
+					    $('#cedula').focus().select()
+					});
+			    }else{
+                    $.get("/datos/detail", {cedula:cedula}, function(response){
+
+                        if(response.misma == 'ok'){
+                            apprise('<span style="color:#FF0000;font-weight:bold">No puede agregarse usted mismo a su lista</span>', {'textOk': 'Aceptar'}, function() {
+                                $('#cedula').focus().select()
+                            });
+                        }else if(response.existe == 'ok'){
+                            apprise('<span style="color:#FF0000;font-weight:bold">Este N&uacute;mero de C&eacute;dula ya pertenece a su lista</span>', {'textOk': 'Aceptar'}, function() {
+                                $('#cedula').focus().select()
+                            });
+                        }else{
+                            var s_nombre = ''
+                        if(response.datos.s_nombre != ''){
+                            var s_nombre  = response.datos.s_nombre
+                        }
+
+                        var s_apellido = ''
+                        if(response.datos.s_apellido != ''){
+                            var s_apellido  = response.datos.s_apellido
+                        }
+
+                        var nombres = response.datos.p_nombre+' '+s_nombre
+                        var apellidos = response.datos.p_apellido+' '+s_apellido
+                        $('#nombre').val(nombres)
+                        $('#apellido').val(apellidos)
+                        $('#id').val(response.datos.id)
+                        }
+                    })
+				}
+			})
+
+		});
+
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	.oculto{
+	    display: none
+	}
+        .pagination{
+            margin: 5px 0 !important;
+        }
+	table.dataTable th,table.dataTable td {
+	    white-space: nowrap;
+        }
+	
+	#divmodulo {
+	    -moz-animation-duration: 3s;
+	    -webkit-animation-duration: 3s;
+	    -op-animation-duration: 3s;
+	}
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+	#nombres_new{
+	    text-transform: uppercase
+	}
+
+    input[type="search"] {
+        width: 400px !important;
+    }
+    </style>
+    {% endblock%}
+    {% block contenido %}
+
+   	<div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 90%;margin: auto;height: auto;position: relative; top:20px;">
+		<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+			<span style="font-size: 16px;font-weight: bold;">Patriotas BVA 200</span>
+		</div>
+		<div class="row">
+
+			<div class="col-lg-6">
+				<div class="panel-body">
+			<div id="div_registro" style="width:100%;">
+			<fieldset>
+				<legend class="titulo">Datos del Patrullero</legend>
+				<br/>
+				<br/>
+				<form id="frmregistro">
+					{% csrf_token %}
+					<input type="hidden"  name="id" id="id" class="form-control" value="">
+					<div class="row">
+						<div class="col-lg-12">
+							<label>C&eacute;dula</label>
+							<div class="input-group">
+								<input  type="text" placeholder="C&eacute;dula" id="cedula" name="cedula" class="form-control input-sm" />
+								<span class="input-group-btn ">
+									<button style="font-size: 12px;" type="button" id="buscar" class="btn btn-primary btn-sm">
+										Buscar
+									</button>
+								</span>
+							</div>
+						</div>
+						<br/>
+						<br/>
+						<br/><br/>
+						<div class="col-lg-6">
+							<div style="padding:3px" class="form-group col-xs-12">
+								<label>Nombres</label>
+								<input type="text" style="color:#000000" disabled="disabled" name="nombre" id="nombre" class="form-control input-sm" value="">
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div style="padding:3px" class="form-group col-xs-12">
+								<label>Apellidos</label>
+								<input type="text" style="color:#000000" disabled="disabled" name="apellido" id="apellido" class="form-control input-sm" value="">
+							</div>
+						</div>
+						<!--<div class="col-lg-6">
+							<div style="padding:3px" class="form-group col-xs-12">
+								<label>Telefono</label>
+								<input type="text" style="color:#000000" disabled="disabled" name="telefono" id="telefono" class="form-control input-sm" value="">
+							</div>
+						</div>-->
+					</div>
+					<div class="col-lg-12" style="text-align:center">
+							<div style="padding:3px" class="form-group col-xs-12">
+								<button class="btn btn-success" id="guardar" type="button"> Agregar a mi Patrulla </button>
+							</div>
+						</div>
+
+				  </form>
+			</fieldset>
+		   </div>
+		</div>
+			</div>
+			<!----- LISTA -->
+			<div class="col-lg-6">
+				<div class="panel-body">
+				<div id="div_lista" style="width:100%;">
+				<fieldset>
+					 <legend class="titulo">Mi Patrulla</legend>
+					 <br/>
+					 <br/>
+					 <table style="width:100%;" border="0" align="center" class="tablas table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+						 <thead>
+						 <tr class="info">
+
+							 <th>N&deg;</th>
+							 <th>Cedula</th>
+							 <th>Nombres</th>
+							 <!--<th>Telefono</th>
+							 <th>Departamento</th>-->
+						 </tr>
+						 </thead>
+						 <tbody>
+						 {% for dato in listado %}
+							<tr>
+								<td>{{forloop.counter}}</td>
+								<td>
+									{{dato.datos__cedula}}
+								</td>
+								<td>
+									{{dato.datos__p_nombre}} {{dato.datos__s_nombre|default:""}} {{dato.datos__p_apellido}} {{dato.datos__s_apellido|default:""}}
+								</td>
+								<!--<td>
+									{{dato.datos__telefono}}
+								</td>
+								<td>
+									{{dato.datos__departamento}}
+								</td>-->
+							</tr>
+						 {% endfor %}
+						 </tbody>
+					 </table>
+				</fieldset>
+			   </div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

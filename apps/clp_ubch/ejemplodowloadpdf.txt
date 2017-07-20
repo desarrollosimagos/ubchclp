@@ -1,0 +1,50 @@
+class ClpUbchReport(View):
+    template_name = 'registro/clp_ubch.html'
+    model = ClpUBC
+
+    #################################################
+    # Instancia de la clase heredada L es horizontal y P es vertical
+    pdf = class_report.ClpUbchReportG(orientation='P',
+                                      unit='mm',
+                                      format='letter')  # HORIENTACION DE LA PAGINA
+
+    #pdf.set_title(title)
+    pdf.set_author('Marcel Arcuri')
+    pdf.alias_nb_pages()  # LLAMADA DE PAGINACION
+    pdf.add_page()  # AÑADE UNA NUEVA PAGINACION
+    #pdf.set_font('Times','',10) # TAMANO DE LA FUENTE
+    pdf.set_font('Arial', 'B', 15)
+    pdf.set_fill_color(157, 188, 201)  # COLOR DE BOLDE DE LA CELDA
+    pdf.set_text_color(24, 29, 31)  # COLOR DEL TEXTO
+    pdf.set_margins(25, 10, 15)  # MARGENE DEL DOCUMENTO
+    #pdf.ln(20) # Saldo de linea
+    # 10 y 50 eje x y y 200 dimencion
+    #pdf.line(10, 40, 200, 40) Linea
+    pdf.line(20, 47, 200, 47)  # Doble linea debado del acta
+    pdf.line(20, 47.5, 200, 47.5)
+
+    pdf.line(160, 93, 200, 93)  # Doble linea debado del primer monto
+    pdf.line(160, 93.5, 200, 93.5)
+
+    pdf.line(40, 220, 180, 220)  # Doble linea Firma
+    pdf.line(40, 220.5, 180, 220.5)
+
+    pdf.set_fill_color(255, 255, 255)
+    pdf.set_font('Arial', 'B', 10)
+    pdf.cell(140, 5, "".decode("UTF-8"), '', 0, 'L', 1)
+    pdf.cell(50, 5, "UNIDAD DE RECURSOS HUMANOS".decode("UTF-8"), '', 1, 'R', 1)
+
+    pdf.output('reporte/prueba.pdf', 'F')
+
+    def get_context_data(self, **kwargs):
+        context = {}
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self.get_context_data()
+        response = HttpResponse(content_type='application/pdf')
+        #response['Content-Disposition'] = 'inline; filename="reporte/prueba.pdf"'
+        response['Content-Disposition'] = 'attachment; filename="reporte/acta_vacaciones.pdf"'
+
+        return response
+

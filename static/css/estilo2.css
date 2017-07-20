@@ -1,0 +1,48 @@
+table.dataTable{clear:both;width:100%;font-size:12px;margin:0 ;border:1px solid #999}
+table.dataTable thead th{font-weight:700;background-color:#428bca;cursor:pointer;color:#FFF;padding:3px 18px 3px 10px;border:1px solid #999}
+table.dataTable tfoot th{border-top:1px solid #000;font-weight:700;padding:3px 18px 3px 10px}
+table.dataTable thead tr th{border:1px solid #999}
+table.dataTable tbody tr td{border:1px solid #999}  
+table.dataTable td{cursor:default;padding:3px 10px;border:1px solid #999}
+table.dataTable td.center,table.dataTable td.dataTables_empty{text-align:center}
+table.dataTable tr.odd{background-color:#F8FEFF}
+table.dataTable tr.even{background-color:#FFFFFF}
+table.dataTable thead th.sorting_false{cursor:default}
+table.dataTable tr.odd:hover,table.dataTable tr.even:hover{background-color:#CCCCCC}
+table.dataTable tr.odd td.sorting_2{background-color:#DADCFF}
+table.dataTable tr.odd td.sorting_3{background-color:#E0E2FF}
+table.dataTable tr.even td.sorting_2{background-color:#F2F3FF}
+table.dataTable tr.even td.sorting_3{background-color:#F9F9FF}
+.dataTables_wrapper{position:relative;clear:both;zoom:1;font-size:13px;}
+.dataTables_wrapper input[type='text']{width: 200px;padding:5px;}
+.dataTables_length select{width:65px}
+.dataTables_length{float:left;padding: 0px}
+.dataTables_filter{float:right;text-align:right;}
+.dataTables_info{clear:both;float:left;padding:5px}
+.dataTables_paginate{float:right;text-align:right;font-size:11px;padding:5px}
+.dataTables_scroll{clear:both}
+.dataTables_scrollBody{margin-top:-1px;-webkit-overflow-scrolling:touch}
+.paginate_disabled_previous,.paginate_enabled_previous,.paginate_disabled_next,.paginate_enabled_next{height:19px;float:left;cursor:pointer;color:#111!important}
+.paginate_disabled_previous:hover,.paginate_enabled_previous:hover,.paginate_disabled_next:hover,.paginate_enabled_next:hover{text-decoration:none!important}
+.paginate_disabled_previous,.paginate_disabled_next{color:#666!important}
+.paginate_disabled_previous,.paginate_enabled_previous{padding-left:23px}
+.paginate_disabled_next,.paginate_enabled_next{padding-right:23px;margin-left:10px}
+.paginate_enabled_previous{background:url(imagenes/datatable/back_enabled.png) no-repeat top left}
+.paginate_enabled_previous:hover{background:url(imagenes/datatable/back_enabled_hover.png) no-repeat top left}
+.paginate_disabled_previous{background:url(imagenes/datatable/back_disabled.png) no-repeat top left}
+.paginate_enabled_next{background:url(imagenes/datatable/forward_enabled.png) no-repeat top right}
+.paginate_enabled_next:hover{background:url(imagenes/datatable/forward_enabled_hover.png) no-repeat top right}
+.paginate_disabled_next{background:url(imagenes/datatable/forward_disabled.png) no-repeat top right}
+.paging_full_numbers{height:22px;line-height:22px}
+.paging_full_numbers a:hover{text-decoration:none}
+.paging_full_numbers a.paginate_button,.paging_full_numbers a.paginate_active{border-radius: 6px;border:1px solid #aaa;cursor:pointer;color:white!important;font-size:11px;margin:0 3px;padding:2px 5px}
+.paging_full_numbers a.paginate_button{background-color:#428bca;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2)}
+.paging_full_numbers a.paginate_button:hover{background-color:#2b669a;text-decoration:none!important}
+.paging_full_numbers a.paginate_active{background-color:#F7B4F1}
+.dataTables_processing{position:absolute;top:50%;left:50%;width:250px;height:30px;margin-left:-125px;margin-top:-15px;border:1px solid #ddd;text-align:center;color:#999;font-size:15px;background-color:#FFF;padding:14px 0 2px}
+.sorting{background:url(imagenes/datatable/sort_both.png) no-repeat center right}
+.sorting_asc{background:url(imagenes/datatable/sort_asc.png) no-repeat center right}
+.sorting_desc{background:url(imagenes/datatable/sort_desc.png) no-repeat center right}
+.sorting_asc_disabled{background:url(imagenes/datatable/sort_asc_disabled.png) no-repeat center right}
+.sorting_desc_disabled{background:url(imagenes/datatable/sort_desc_disabled.png) no-repeat center right}
+.paginate_disabled_previous:active,.paginate_enabled_previous:active,.paginate_disabled_next:active,.paginate_enabled_next:active,.paging_full_numbers a:active,table.dataTable th:active{outline:none}

@@ -1,0 +1,475 @@
+{% extends "base/base.html" %}
+
+    {% block cssfile %}
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    
+    {% block jsfile %}
+        <script src="{{STATIC_URL}}js/apprise.js"></script>
+        <script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+        <script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+        <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+        <script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block scripti %}
+{% load templatag_grupos %}
+<script type="text/javascript">
+$(document).ready(function () {
+	$("#id_asig_ubch_clp").attr('class','active');
+    var entero = "0123456789"
+    $('#cedula_jefe,#cedula,#telefono').validar(entero);
+    $('#cedula_jefe').focus();
+    var TUbch = $('#tabla_ubch').dataTable({
+	responsive: true,
+        "iDisplayLength": 5,
+        "iDisplayStart": 0,
+        "sPaginationType": "full_numbers",
+        "aLengthMenu": [5, 10, 20, 30, 40, 50],
+        "oLanguage": {"sUrl": "/static/js/es.txt"},
+        "aoColumns": [
+	    {"sClass": "control","sWidth": "5%"},
+            {"sClass": "registro right", "sWidth": "5%"},
+	    {"sClass": "registro left", "sWidth": "70%"},
+	    {"sClass": "registro right", "sWidth": "5%"},
+	    {"sClass": "registro right", "sWidth": "15%"},
+            {"sClass": "none", },
+            {"sWidth": "3%", "bSortable": false, "sClass": "center sorting_false", "bSearchable": false}
+        ]
+    });
+
+    var url = 'www.registro1x10.org.ve'
+    // url = 'localhost:8000'
+    
+    $('#buscar_jefe').on('click',function () {
+
+		var cedula = $('#cedula_jefe')
+        TUbch.fnClearTable();
+        
+        $('div#div_registro').slideUp(1000);
+        $('div#div_lista').slideDown(1000);
+        $('#cod_ubch,#ubch').val('')
+        $('#add').css('display', 'block');
+		if( !$(".appriseInner").is(":visible") == true){  
+			if (cedula.val() === null || cedula.val().length === 0 || /^\s+$/.test(cedula.val())) {
+				apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el n&uacute;mero de C&eacute;dula</span>', {'textOk': 'Aceptar'}, function () {
+					cedula.parent('div').addClass('has-error');
+					cedula.focus();
+				});
+			} else {
+					$.get("http://" + url + "/clpubch/clp" ,{cedula:cedula.val()}, function (response) {
+						$('#nombre_jefe').val(response.clp.nombres)
+						$('#cod_circulo').val(response.clp.cod_circulo)
+						$('#div_add').css('display', 'block')
+						if (response.ubch != 'error') {
+							$.each(response.ubch, function (i, obj) {
+								var eli = '<img class="eliminar" id="' + obj.id + '" style="width:24px;height:24px;cursor:pointer"  src="/static/img/eliminar.png" />';
+								TUbch.fnAddData(['',obj.cedula,obj.nombre,obj.telefono,obj.cod_ubch, obj.nom_ubch, eli]);
+							});
+						}
+					}, 'json')
+					.error(function (datos) {
+						apprise('<span style="color:#FF0000;font-weight:bold">Esta C&eacute;dula no pertenece a un jefe de circulo</span>', {'textOk': 'Aceptar'}, function () {
+							cedula.parent('div').addClass('has-error')
+							cedula.focus().select()
+							$('#nombre_jefe,#cod_circulo,#cod_ubch_jefe,#ubch_jefe').val('')
+							$('#add.nuevo').css('display', 'none');
+							$('div#div_registro').slideUp(1000);
+							$('div#div_lista').slideDown(1000);
+						});
+					});
+			}
+		}
+    })
+
+    $('#buscar_ubch').click(function () {
+        var cod_ubch = $('#cod_ubch')
+		var este = $(this);
+		if( !$(".appriseInner").is(":visible") == true){ 
+			if (cod_ubch.val() === null || cod_ubch.val().length === 0 || /^\s+$/.test(cod_ubch.val())) {
+			apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el C&oacute;digo de al UBCH</span>', {'textOk': 'Aceptar'}, function () {
+				cod_ubch.parent('div').addClass('has-error');
+				cod_ubch.focus();
+			});
+			} else {
+				$.get("http://" + url + "/clpubch/ubch" ,{cod_ubch:cod_ubch.val()}, function (data) {
+					$('#ubch').val(data.ubch.nom_ubch)
+					$('#cedula_jubch').val(data.ubch.cedula)
+					$('#nombres').val(data.ubch.nombre)
+					$('#telefono').val(data.ubch.telefono)
+				}, 'json').fail(function () {
+					apprise('<span style="color:#FF0000;font-weight:bold">Este Co&oacute;digo no pertenece a una UBCH</span>', {'textOk': 'Aceptar'}, function () {
+					este.parent('div').addClass('has-error')
+					$('#cod_ubch').focus().select()
+					$('#ubch,#cedula_jubch,#nombres,#telefono').val('')
+					});
+				});
+			}
+		}
+    })
+
+    $("#cedula_jefe").on({
+	focus: function() {
+	    $('#h_ced_jefe').val('true')
+	    $('#h_cod_ubch').val('false')
+	}
+    });
+    
+    $("#cod_ubch").on({
+	focus: function() {
+	    $('#h_cod_ubch').val('true')
+            $('#h_ced_jefe').val('false')
+	}
+    });
+ 
+    $(document).on('keypress', function (e) {
+	var code = (e.which) ? e.which : e.keyCode
+        if (code == 13) {
+            var ced_jefe = $('#h_ced_jefe').val()
+            var cod_ubch = $('#h_cod_ubch').val()
+            if (ced_jefe == 'true') {
+                $('#buscar_jefe').trigger('click');
+            } else if (cod_ubch == 'true') {
+                $('#buscar_ubch').trigger('click');
+            }
+        }
+    });
+
+    $('#add').click(function () {
+        $('#div_add').css('display', 'none')
+
+        $('div#div_lista').slideUp(1000);
+        $('div#div_registro').slideDown(1000, function () {
+            $('#cedula').focus();
+        });
+
+    });
+
+
+    $('#registrar').click(function () {
+        var $cod_ubch = $('#cod_ubch')
+
+        if ($cod_ubch.val() === null || $cod_ubch.val().length === 0 || /^\s+$/.test($cod_ubch.val())) {
+
+            apprise('<span style="color:#FF0000;font-weight:bold">Debe indicar el C&oacute;digo de la UBCH</span>', {'textOk': 'Aceptar'}, function () {
+                $cedula.parent('div').addClass('has-error');
+                $cedula.focus();
+            });
+        } else {
+            $('#cod_circulo').prop('disabled', false);
+            $.post("", $("#frmregistro").serialize() + '&accion=guardar', function (response) {
+				
+                $('#cod_circulo').prop('disabled', true);
+                if (response.ubch_clp == 'existe') {
+                    apprise('<span style="color:#FF0000;font-weight:bold">Ya este Circulo tiene asociado esta UBCH</span>', {'textOk': 'Aceptar'}, function () {
+                        $cod_ubch.parent('div').addClass('has-error');
+                        $cod_ubch.focus().select();
+                    });
+                } else if (response.ubch == 'existe') {
+                    apprise('<span style="color:#FF0000;font-weight:bold;text-align: center">Esta UBCH ya pertenece a otro Circulo <br/> El Jefe de ese circulo es: "'+response.jefe.nombres+'"</span>', {'textOk': 'Aceptar'}, function () {
+                        $cod_ubch.parent('div').addClass('has-error');
+                        $cod_ubch.focus().select();
+                    });
+                } else if (response['save'] == 'ok') {
+                    var cod_ubch     = $('#cod_ubch').val();
+                    var ubch         = $('#ubch').val();
+					var cedula_jubch = $('#cedula_jubch').val();
+                    var nombres      = $('#nombres').val();
+					var telefono     = $('#telefono').val();
+                    var id = response['id']
+                    apprise('<span style="color:#059102;font-weight:bold">El registro se guardo sastifactoriamente', {'textOk': 'Aceptar'}, function () {
+                        var eli = '<img class="eliminar" id ="' + id + '" style="width:24px;height:24px;cursor:pointer"  src="/static/img/eliminar.png" />';
+                        TUbch.fnAddData(['',cedula_jubch, nombres, telefono, cod_ubch, ubch, eli]);
+                        $('div#div_registro').slideUp(1000);
+                        $('div#div_lista').slideDown(1000);
+                        $('#cod_ubch,#ubch,#cedula_jubch,#nombres,#telefono').val('')
+                        $('#add').css('display', 'block');
+                    });
+
+
+                }
+            }, 'json');
+        }
+
+    });
+
+    $('#cancelar').click(function () {
+        $('div#div_registro').slideUp(1000);
+        $('div#div_lista').slideDown(1000);
+        $('#cod_ubch,#ubch').val('')
+        $('#add').css('display', 'block');
+    });
+
+
+    $('#tabla_ubch').on('click', 'img.eliminar', function () {
+        var id_reg = $(this).attr('id')
+        var padre = $(this).closest('tr');
+        var nRow = padre[0];
+	
+        apprise('<span style="color:#FF0000;font-weight:bold">&iquest;Desea Eliminar el registro?</span>', {'verify': true, 'textYes': 'Aceptar', 'textNo': 'Cancelar'}, function (r) {
+            if (r) {
+                $.post("http://" + url + "/clpubch/eliminar/"+id_reg, {csrfmiddlewaretoken: '{{ csrf_token }}'}, function (response) {
+                    if (response.eliminar == 'ok') {
+                        TUbch.fnDeleteRow(nRow);
+                        apprise('<span style="color:#059102;font-weight:bold">El registro ha sido eliminado sastifactoriamente', {'textOk': 'Aceptar'});
+                    }
+                }, 'json');
+            }
+        });
+    });
+	
+    $('#modificar').on('click', function () {
+		$('#div_add').css('display', 'none')
+        $('div#div_lista').slideUp(1000);
+        $('div#div_registro').slideUp(1000);
+		$('div#divmodificar').slideDown(1000, function () {
+			$('#cedula_jefe_new').focus();
+		});
+    });
+    
+    $('#guardar').on('click',function () {
+
+		var $cedula_jefe = $('#cedula_jefe').val()
+        apprise('<span style="color:#FF0000;font-weight:bold">&iquest;Desea Modificar el registro?</span>', {'verify': true, 'textYes': 'Aceptar', 'textNo': 'Cancelar'}, function (r) {
+			if (r) {
+				var data_send     = $('#frmmodificar').serialize() + '&' + $.param({cedula_jefe:$cedula_jefe,accion: 'update_clp',});
+                $.post("", data_send, function (response) {
+					if (response['update'] == 'ok') {
+						apprise('<span style="color:#059102;font-weight:bold">El registro ha sido modificado sastifactoriamente', {'textOk': 'Aceptar'},function(){
+							$('#divmodificar').slideUp(1000);
+							$('div#div_lista').slideDown(1000);
+							$('#cedula_jefe').val($('#cedula_jefe_new').val())
+							$('#nombre_jefe').val($('#nombre_jefe_new').val())
+							$('#cedula_jefe_new,#nombre_jefe_new,#id_sexo_new,#id_edad_new,#id_tlf_new').val('');
+						});
+                    }
+                }, 'json')
+            }
+        });
+    });
+    
+});
+
+</script>
+{% endblock  %}
+{% block estilos %}
+<style>
+    .nuevo:hover{
+        cursor: pointer;
+        text-decoration:underline;
+        color:#4F9FCF;
+    }
+    .modal-content {
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 30% !important;
+	width: 40%;
+    }
+    #divmodulo {
+	-moz-animation-duration: 3s;
+	-webkit-animation-duration: 3s;
+	-op-animation-duration: 3s;
+    }
+    .titulo{
+        color: #1b809e;
+        padding: 0;
+        margin: 0 auto;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+{% endblock%}
+{% block contenido %}
+    <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 90%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;"><span style="font-size: 16px;font-weight: bold;">Asignar UBCH a CLP</span></div>
+	<div class="panel-body">
+	    <form id="frmregistro">
+		{% csrf_token %}
+		<fieldset>
+		    <legend class="titulo">Datos del Jefe del CLP::</legend>
+		    <br/>
+		    <div style="margin: 0 auto;width:30%" class="form-group">
+			<label>C&eacute;dula:</label>&nbsp;
+			<div class="input-group">
+			    <input  type="text" placeholder="C&eacute;dula" id="cedula_jefe" name="cedula_jefe" class="form-control input-sm" />
+			    <input type="hidden" id="h_ced_jefe" value="false"/>
+			    <span class="input-group-btn ">
+				<button style="font-size: 12px;" type="button" id="buscar_jefe" class="btn btn-primary input-sm">
+				    Buscar
+				    <!--<span class="glyphicon glyphicon-search "></span>-->
+				</button>
+			    </span>
+			</div>
+		    </div>
+		    <br/>
+		    <div style="width:30%;margin: 0 auto" class="form-group">
+			<label>Nombre:</label>
+			<input  style="background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_jefe" name="nombre_jefe" class="form-control input-sm" placeholder="Nombre">
+		    </div>
+		    <br/>
+		    <div style="width:30%;margin: 0 auto" class="form-group">
+			<label>C&oacute;digo CLP:</label>
+			<input style="background-color:#FFFFFF;color:#000000" disabled="disabled" id="cod_circulo" name="cod_circulo" class="form-control input-sm">
+		    </div>
+		</fieldset>
+		<br/>
+		<br/>
+		<div id="div_registro" style="display:none">
+		    <fieldset>
+			<legend class="titulo">Datos de la UBCH::</legend>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-5">
+				<label>C&oacute;digo:</label>
+				<div class="input-group  col-xs-8">
+				    <input type="text" id="cod_ubch" name="cod_ubch" placeholder="C&oacute;digo" class="form-control input-sm" />
+				    <input type="hidden" id="h_cod_ubch" value="false"/>
+				    <span class="input-group-btn ">
+					<!--<input style="font-size: 11px;" id="buscar_ubch" type="button" class="btn btn-primary input-sm" value="Buscar"/>-->
+					<button style="font-size: 12px;" type="button" id="buscar_ubch" class="btn btn-primary input-sm">
+					    Buscar
+					    <!--<span class="glyphicon glyphicon-search "></span>-->
+					</button>
+				    </span>
+				</div>                           
+			    </div>
+			    <div class="form-group col-xs-7">
+				<label>UBCH:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				<input style="width:87%; background-color:#FFFFFF;color:#000000" disabled="disabled" id="ubch" name="ubch" class="form-control input-sm">
+			    </div>                        
+			</div>
+		    </fieldset>
+			<br/>
+			<br/>
+		    <fieldset>
+			<legend class="titulo">Datos del Jefe de la UBCH::</legend>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-3">
+				<label>C&eacute;dula:&nbsp;</label>
+				<input  style="width: 65%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="cedula_jubch" name="cedula_jubch" class="form-control input-sm" placeholder="C&eacute;dula">                           
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Nombres:</label>
+				<input  style="width: 80%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombres" name="nombres" class="form-control input-sm" placeholder="Nombrey Apellido"> 
+			    </div>
+			    <div class="form-group col-xs-3">
+				<label>Tel&eacute;fono:</label>
+				<input  style="width: 65%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="telefono" name="telefono" class="form-control input-sm" placeholder="Tel&eacute;fono"> 
+			    </div>   
+			</div>
+		    </fieldset>
+		    <br/>
+		    <br/>
+		    <br/>
+		    <div class="form-inline" style="text-align:center;">
+			<input style="margin: 0 auto" class="btn btn-primary btn-sm" type="button" id="registrar" value="Registrar"/>
+			&nbsp
+			<input class="btn btn-primary btn-sm" type="button" id="cancelar" value="Cancelar"/>
+		    </div>
+		</div>
+		<div class="col-xs-4"></div>
+		<div id="div_add" style="display: none" class="form-group col-xs-6">
+		    <div class="col-xs-5">
+				<button type="button" id="add" class="btn btn-success btn-block btn-large" >
+					<span class="glyphicon glyphicon-plus "></span>
+					Nuevo Registro
+				</button>
+		    </div>
+		    {%  ifusergroup administrador %}
+		    <div class="col-xs-6">
+				<button type="button" id="modificar" class="btn btn-info btn-block btn-large" >
+					<span class="glyphicon glyphicon-edit"></span>
+					Modificar Jefe del CLP
+				</button>
+            </div>
+            {% endifusergroup %}
+		</div>
+		
+	    </form>
+	    <br/>
+	    <br/>
+	    <br/>
+	    <div id="div_lista" style="width:90%;margin: 0 auto">
+		    <fieldset>
+			<legend class="titulo">Listado de UBCH::</legend>
+			<br/>
+			<table style="width:100%;" border="0" align="center" class="table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+			    <thead>
+				<tr class="info">
+				    <th>&nbsp;</th>
+				    <th width="64">C&eacute;dula</th>
+				    <th width="64">Nombre y Apellido</th>
+				    <th width="64">Tel&eacute;fono</th>
+				    <th>C&oacute;digo UBCH</th>
+				    <th width="64">UBCH</th>
+				    <th width="64">Eliminar</th>
+				</tr>
+			    </thead>
+			    <tbody>
+			    </tbody>
+			</table>
+		    </fieldset>
+		</div>
+	    <div id="divmodificar" style="display: none">
+		<fieldset>
+		    <legend class="titulo">Datos del Nuevo Jefe de CLP::</legend>
+		    <br/>
+		    <br/>
+		    <form id="frmmodificar">
+			{% csrf_token %}
+			<div class="form-inline">
+			    <div class="form-group col-xs-6">
+				<label>C&eacute;dula:</label>
+				<input  style="width: 75%;"  id="cedula_jefe_new" name="cedula_jefe_new" class="form-control input-sm" placeholder="C&eacute;dula" maxlength="9">                           
+			    </div>
+			    <div class="form-group col-xs-6">
+				<label>Nombres y Apellido:</label>
+				<input  style="width: 75%;"  id="nombre_jefe_new" name="nombre_jefe_new" class="form-control input-sm" placeholder="Nombres"> 
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-4">
+				<label>Sexo:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+				<select style="width: 80%;" id='sexo_new' name='sexo_new' class="form-control input-sm">
+				    <option value='0'>Seleccione</option>
+				    <option value='M'>Masculino</option>
+				    <option value='F'>Femenino</option>
+				</select>
+			    </div>
+			    <div class="form-group col-xs-4">
+				<label>Edad:</label>
+				<input  style="width: 80%;"  id="edad_new" name="edad_new" class="form-control input-sm" placeholder="Edad"> 
+			    </div>
+			    <div class="form-group col-xs-4">
+				<label>Tel&eacute;fono:</label>
+				<input  style="width: 80%;"  id="id_tlf_new" name="tlf_new" class="form-control input-sm" placeholder="Tel&eacute;fono" maxlength="11">                           
+			    </div>
+			</div>
+			<br/>
+			<br/>
+			<br/>
+			<br/>
+			<div class="form-inline">
+			    <div class="form-group col-xs-12" style="text-align:center;">
+				<input style="margin: 0 auto" class="btn btn-primary btn-sm" type="button" id="guardar" value="Guardar"/>
+				&nbsp
+				<input class="btn btn-primary btn-sm" type="button" id="restablecer" value="Cancelar"/>
+			    </div>
+			</div>
+		    </form>
+		</fieldset>
+	    </div>
+	</div>
+    </div>
+{% endblock%}

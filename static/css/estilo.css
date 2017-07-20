@@ -1,0 +1,8 @@
+.panel-heading {
+    background-color: #FFFFFF !important;
+    padding: 10px 15px;
+    border-bottom: 1px solid #E5E5E5 !important;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    color: #428BCA !important;
+}

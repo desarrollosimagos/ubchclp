@@ -1,0 +1,18 @@
+{
+    "sProcessing":   "Procesando...",
+    "sLengthMenu":   "<label class='control-label'>Mostrar</label> _MENU_",
+    "sZeroRecords":  "No se encontraron resultados",
+    "sInfo":         "desde _START_ hasta _END_  (<span style='color:red'>_TOTAL_ total</span>)",
+    "sInfoEmpty":    "",
+    "sInfoFiltered": "(total _MAX_)",
+    "sInfoPostFix":  "",
+    "sSearch":       "",
+    "sSearchPlaceholder": "Buscar",
+    "sUrl":          "",
+    "oPaginate": {
+        "sFirst":    "<<",
+        "sPrevious": "<",
+        "sNext":     ">",
+        "sLast":     ">>"
+    }
+}

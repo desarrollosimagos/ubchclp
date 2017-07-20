@@ -1,0 +1,19 @@
+from django.db import models
+
+# Esta es mi CLASE.
+
+
+class Estado(models.Model):
+    """Esta es la Clase que define todo lo referente a los estados
+        Registrar Modificar Eliminar y Consultar
+    """
+    cod_estado  = models.IntegerField(unique=True)
+    estado      = models.CharField(max_length=50)
+    user        = models.CharField(max_length=15, null=True, blank=True)
+    date_create = models.DateTimeField(auto_now_add=True, auto_now=False, null=True)
+    date_update = models.DateTimeField(auto_now_add=False, auto_now=True, null=True)
+    
+    
+
+    def __unicode__(self):
+        return self.estado

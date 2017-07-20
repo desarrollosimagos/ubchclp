@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>CLP</title>
+
+</head>
+
+<body>
+    {% block contenido %}
+    <table border="1" align="center">
+              <tr>
+                <h1>Listado de Jefes de Circulos Patrioticos</h1>
+                 <tr>
+		<td colspan=3>
+		  <a href='/clp/data'>
+		    	<button>Importar CLP</button>
+		  </a>
+		</td>
+	      </tr>
+	      <tr>
+                <td>Cedula</td>
+                <td>Nombres</td>
+                <td>Sexo</td>
+                <td>edad</td>
+                <td>Telefono</td>
+                <td>Nombre agrupacion</td>
+                <td>id estado</td>
+		<td>id municipio</td>
+		<td>id parroquia</td>
+		<td>codigo circulo</td> 
+              </tr>
+	    {% for m in listar_clp %}
+              <tr>
+                <td>{{m.nac}}- {{m.cedula}}</td>
+                <td>{{m.nombres}}</td>
+                <td>{{m.sexo}}</td>
+                <td>{{m.edad}}</td>
+                <td>{{m.telefono}}</td>
+                 <td>{{m.nomb_agrup}}</td>
+		  <td>{{m.codigo_circulo}}</td>
+              </tr>
+            {% empty %}
+	      <tr style='text-align: center;'>
+		<td colspan=2>No hay registros</td>
+	      </tr>
+	      {% endfor %}
+	    </table>
+    {% if is_paginated %}
+    <div class="pagination" align="center">
+        <span class="page-links">
+            {% if page_obj.has_previous %}
+                <a href="/clp/listar/?page={{ page_obj.previous_page_number }}">Anterior</a>
+            {% endif %}
+            <span class="page-current">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a href="/clp/listar/?page={{ page_obj.next_page_number }}">Siguiente</a>
+            {% endif %}
+        </span>
+    </div>
+    {% endif %}
+    {% endblock contenido%}
+</body>
+</html>
+

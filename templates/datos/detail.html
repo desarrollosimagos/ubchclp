@@ -1,0 +1,155 @@
+{% extends "base/base.html" %}
+    
+    {% block cssfile %}
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+    {% endblock  %}
+    {% block jsfile %}
+    <script src="{{STATIC_URL}}js/apprise.js"></script>
+    <script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+    <script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+    <script src="{{STATIC_URL}}js/validarcampos.js"></script>
+    {% endblock  %}
+    
+    {% block scripti %}
+    <!--  Bloque template para grupos templatag_grupos-->
+	{% load templatag_grupos %}
+	<script type="text/javascript">
+	    $(document).ready(function() {
+			$("#id_reg_listado").attr('class','active');
+
+
+			var TUbch = $('#tabla_ubch').dataTable({
+				"iDisplayLength": 12,
+				"iDisplayStart": 0,
+				"sPaginationType": "full_numbers",
+				"aLengthMenu": [12, 20, 30, 40, 50],
+				"oLanguage": {"sUrl": "/static/js/es.txt"},
+
+				"aoColumns": [
+					{"sClass": "control", "sWidth": "4%"},
+					{"sClass": "right", "sWidth": "4%"},
+					{"sClass": "left", "sWidth": "38%"},
+					{"sClass": "left", "sWidth": "4%"},
+					{"sClass": "left", "sWidth": "40%"},
+				]
+			});
+
+			//var url = 'www.registro1x10.org.ve'
+			var url = "localhost:8000"
+
+			$('#guardar').click(function(){
+				var id_emp = $('#id').val();
+				$.post("/datos/registro/", {id_emp:id_emp,'csrfmiddlewaretoken': "{{ csrf_token }}"}, function(response){
+				    if (response['success'] == 'ok') {
+						apprise('<span style="color:#059102;font-weight:bold">Añadido a su lista</span>', {'textOk': 'Aceptar'}, function() {
+							window.location = '/datos/listar/'
+						});
+					}else{
+						apprise('<span style="color:#FF0000;font-weight:bold">No puede agregar mas personas a su lista</span>', {'textOk': 'Aceptar'}, function() {
+							//window.location = '/datos/listar/'
+						});
+					}
+				})
+			})
+		});
+
+	</script>
+    {% endblock  %}
+    
+    {% block estilos %}
+    <style type="text/css">
+	.oculto{
+	    display: none
+	}
+        .pagination{
+            margin: 5px 0 !important;
+        }
+	table.dataTable th,table.dataTable td {
+	    white-space: nowrap;
+        }
+	
+	#divmodulo {
+	    -moz-animation-duration: 3s;
+	    -webkit-animation-duration: 3s;
+	    -op-animation-duration: 3s;
+	}
+	.titulo{
+	    color: #1b809e;
+	    padding: 0;
+	    margin: 0 auto;
+	    font-size: 16px;
+	    text-align: center;
+	    font-weight: bold;
+	}
+	#nombres_new{
+	    text-transform: uppercase
+	}
+
+    input[type="search"] {
+        width: 400px !important;
+    }
+    </style>
+    {% endblock%}
+    {% block contenido %}
+   <div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+	<div class="panel-heading " style="font-weight: bold;font-size: 12px;">
+        <span style="font-size: 16px;font-weight: bold;">Datos Personales</span>
+    </div>
+	<div class="panel-body">
+
+	    <div id="div_lista" style="width:100%;">
+		<fieldset>
+			<legend class="titulo">Datos Personales::</legend>
+			<br/>
+		    <br/>
+			<form id="frmregistro">
+				{% csrf_token %}
+				<input type="hidden"  name="id" id="id" class="form-control" value="{{detail.id}}">
+				<div class="row">
+					<div class="col-lg-6">
+						<div style="padding:3px" class="form-group col-xs-12">
+							<label>Cedula</label>
+							<input type="text" style="color:#000000" disabled="disabled" name="cedula" id="cedula" class="form-control" value="{{detail.cedula}}">
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div style="padding:3px" class="form-group col-xs-12">
+							<label>Nombres</label>
+							<input type="text" style="color:#000000" disabled="disabled" name="nombre" id="nombre" class="form-control" value="{{detail.p_nombre}} {{detail.s_nombre|default:''}}">
+						</div>
+					</div>
+                    <div class="col-lg-6">
+                        <div style="padding:3px" class="form-group col-xs-12">
+                            <label>Apellidos</label>
+                            <input type="text" style="color:#000000" disabled="disabled" name="apellido" id="apellido" class="form-control" value="{{detail.p_apellido}} {{detail.s_apellido|default:''}}">
+                        </div>
+                	</div>
+					<div class="col-lg-6">
+						<div style="padding:3px" class="form-group col-xs-12">
+							<label>Telefono</label>
+							<input type="text" style="color:#000000" disabled="disabled" name="telefono" id="telefono" class="form-control" value="{{detail.telefono|default:''}}">
+						</div>
+					</div>
+					<div class="col-lg-12">
+						<div style="padding:3px" class="form-group col-xs-12">
+							<label>Departamento</label>
+							<input type="text" style="color:#000000" disabled="disabled" name="departamento" id="departamento" class="form-control" value="{{detail.departamento}}">
+						</div>
+					</div>
+        		</div>
+				<div class="col-lg-12" style="text-align:center">
+						<div style="padding:3px" class="form-group col-xs-12">
+							<button class="btn btn-success" id="guardar" type="button"> Agregar a mi Lista </button>
+						</div>
+					</div>
+
+			  </form>
+		</fieldset>
+	   </div>
+       </div>
+   </div>
+{% endblock %}

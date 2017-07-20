@@ -1,0 +1,134 @@
+#encoding:utf-8
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from apps.topologia.estados.models import Estado
+from apps.topologia.municipios.models import Municipio
+from .models import Parroquia
+from .forms import FormParroquia
+from django.http import HttpResponse, HttpResponseRedirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger # Paginacion
+from django.contrib.auth.decorators import login_required # Forma para impedir el acceso al sistema
+from django.core import serializers
+import csv # Libreria para inportar CSV
+import os
+from django.db import connection
+#=====================================================================================
+#                            # Clase RegistrarParroquia
+#=====================================================================================
+
+@login_required(login_url='/iniciar/login/')
+def RegistrarParroquia(request):
+    list_e = Estado.objects.all()
+    list_m = Municipio.objects.all()
+    if request.method=='POST':
+        form_reg_par = FormParroquia(request.POST, request.FILES)
+        if form_reg_par.is_valid():
+            new_reg_par = form_reg_par.save(commit=False)
+            new_reg_par.user = request.user.username
+            new_reg_par.save()
+	    return HttpResponseRedirect('/parroquia/listar_parroquia')
+    else:
+         form_reg_par = FormParroquia()
+    ctx = {'form_reg_par':form_reg_par,'list_e':list_e,'list_m':list_m} # ctx = Contexto
+    return render_to_response('topologia/parroquia/registrar_parroquias.html',ctx, context_instance=RequestContext(request))
+
+#=====================================================================================
+                            # Metodo ActualizarParroquia
+#=====================================================================================
+
+@login_required(login_url='/iniciar/login/')
+def ActualizarParroquia(request,pk):
+    list_e = Estado.objects.all()
+    list_m = Municipio.objects.all()
+    obj_reg_parr = Parroquia.objects.get(id=pk)
+    if request.method=='POST':
+        form_reg_parr = FormParroquia(request.POST, request.FILES, instance=obj_reg_parr)
+        if form_reg_parr.is_valid():
+            edit_reg_parr = form_reg_parr.save(commit=False)
+            edit_reg_parr.user = request.user.username
+            edit_reg_parr.save()
+            return HttpResponseRedirect('/parroquia/listar_parroquia')
+    else:
+        form_reg_parr = FormParroquia(instance=obj_reg_parr)
+    ctx = {'form_reg_parr':form_reg_parr,'obj_reg_parr':obj_reg_parr,'list_e':list_e,'list_m':list_m} # ctx = Contexto
+    return render_to_response('topologia/parroquia/actualizar_parroquias.html',ctx, context_instance=RequestContext(request))
+
+#=====================================================================================
+                            # Metodo EliminarParroquia
+#=====================================================================================
+@login_required(login_url='/iniciar/login/')
+def EliminarParroquia(request,pk):
+    obj_reg_pa = Parroquia.objects.get(id=pk)
+    obj_reg_pa.delete()
+    return HttpResponseRedirect('/parroquia/listar_parroquia')
+
+#=====================================================================================
+                            # Metodo BuscarAjaxParr json
+#=====================================================================================
+def BuscarAjaxMun(request):
+    id_est     = request.GET['id']
+    municipios = Municipio.objects.filter(estado_id=id_est)
+    data       = serializers.serialize('json',municipios,
+                                       fields=('cod_municipio','municipio'))
+    #print "LISTA DE MUNICIPIOS: ",data
+    
+    return HttpResponse(data, content_type='application/json')
+
+
+@login_required(login_url='/iniciar/login/')
+def BuscarAjaxPar(request):
+    id_est     = request.GET['id_est']
+    id_mun     = request.GET['id_mun']
+    parroquias = Parroquia.objects.filter(estado_id=id_est,municipio=id_mun)
+    data       = serializers.serialize('json',parroquias,
+                                       fields=('cod_parroquia','parroquia'))
+    return HttpResponse(data, content_type='application/json')
+
+#======================================================================================
+#                  Metodo para listar Registros y Paginacion
+#======================================================================================
+@login_required(login_url='/iniciar/login/')
+def ListarParroquia(request):
+    parroquia      = Parroquia.objects.all().order_by('municipio','parroquia')
+    list_estado    = Estado.objects.all()
+    paginator = Paginator(parroquia, 5) # Show 5 contacts per page
+    page = request.GET.get('page')
+    try:
+        list_parroquia = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        list_parroquia = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        list_parroquia = paginator.page(paginator.num_pages)
+    
+    array = {
+        'list_parroquia' : list_parroquia,
+        'list_estado'    : list_estado,
+    }
+    return render_to_response('topologia/parroquia/lista_parroquia.html', array, context_instance = RequestContext(request))
+
+#=====================================================================================
+#                        # Metetodo load_data_parroquia
+#=====================================================================================
+@login_required(login_url='/iniciar/login/')
+def load_data_parroquia(request):
+    
+    os.path.dirname(os.path.abspath(__file__))
+
+    DIR_URL = os.getcwd()
+    
+    reader = csv.reader(open(DIR_URL+str("/apps/topologia/parroquias/script/parroquias.csv")))
+    
+    for row in reader:
+        data = row[0].split(';')
+        parroquia = Parroquia(
+            #id             = data[0],
+            parroquia       = data[0],
+            estado_id       = data[1],
+            municipio       = data[2],
+            cod_parroquia   = data[3],
+            )
+        parroquia.save()
+    return HttpResponseRedirect('/parroquia/listar_parroquia')
+#=====================================================================================

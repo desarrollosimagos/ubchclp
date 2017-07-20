@@ -1,0 +1,351 @@
+{% extends "base/base.html" %}
+{% block cssfile %}
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.bootstrap.css">
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/dataTables.responsive.css">
+<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+{% endblock  %}
+{% block jsfile %}
+<script src="{{STATIC_URL}}js/apprise.js"></script>
+<script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+<script src="{{STATIC_URL}}js/dataTables.responsive.min.js"></script>
+<script src="{{STATIC_URL}}js/dataTables.bootstrap.js"></script>
+<script src="{{STATIC_URL}}js/validarcampos.js"></script>
+<script src="{{STATIC_URL}}js/jefeinstitucion.js"></script>
+{% endblock  %}
+{% block estilos %}
+<style type="text/css">
+    .oculto{
+        display: none
+    }
+    #tbljefe{
+        font-size: 13px;
+    }
+    #divmodulo {
+        -moz-animation-duration: 3s;
+        -webkit-animation-duration: 3s;
+        -op-animation-duration: 3s;
+    }
+    .titulo{
+        color: #1b809e;
+        padding: 0;
+        margin: 0 auto;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .hiper{
+        color: #3AC1F2;
+        font-size: 15px;
+        cursor: pointer;
+    }
+    .hiper:hover{
+        color: #2DABEF;
+        text-decoration: underline
+    }
+</style>
+{% endblock  %}
+
+{% block contenido %}
+<div class="panel panel-default animated fadeInDown" id="divmodulo" style="width : 80%;margin: auto;height: auto;position: relative; top:20px;">
+    <div class="panel-heading "  style="font-weight: bold;font-size: 12px;"><span style="font-size: 16px;font-weight: bold;">Registro de 1X10</span></div>                   
+    <div class="panel-body">
+        {% csrf_token %}
+        <input type="hidden" id="tipo_registro" value="jefes">
+        <div id="div_instituciones" style="display:none">
+            <fieldset>
+                <legend class="titulo">Datos de la Institución::</legend>
+                <br/>
+                <br/>
+		        <button style="width: 30%;margin: auto" type="button" id="add_clpubch" class="btn btn-success btn-block" >
+			        <span class="glyphicon glyphicon-plus "></span>
+			        Registrar 1X10 de CLP/UBCH
+                </button>
+        		<br/>
+        		<br/>
+        		<br/>
+        		<br/>
+                <form id="form_institucion">
+                    <div class="form-inline col-xs-3"></div>
+                    <div class="form-group col-xs-6">
+                        <div class="input-group">
+                            <input  type="text" placeholder="C&eacute;dula Representante" id="cedula_represe" name="cedula_represe" class="form-control input-sm"/>
+                            <input type="hidden" id="h_ced_jefeinst" value="false"/>
+                            <span class="input-group-btn ">
+                                <button style="font-size: 12px;" type="button" id="buscar_represe" class="btn btn-primary btn-sm">
+                                    Buscar
+                                    <!--<span class="glyphicon glyphicon-search "></span>-->
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div class="form-inline">
+                        <div class="form-group col-xs-6">
+                            <label>Nombre:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_represe" name="nombre_represe" class="form-control input-sm" placeholder="Nombre">                           
+                        </div>
+                        <div class="form-group col-xs-6">
+                            <label>Tel&eacute;fono:</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000"  id="telefono_represe" name="telefono_represe" class="form-control input-sm" placeholder="Tel&eacute;fono" maxlength="11"> 
+                        </div>                        
+                    </div>
+                    <!--<br/>
+                    <br/>
+                    <br/>
+                    <div class="form-inline">
+                        <div class="form-group col-xs-6">
+                            <label>C&oacute;digo:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="codigo_represe" name="codigo_represe" class="form-control input-sm" placeholder="Nombre">                           
+                        </div>
+                        <div class="form-group col-xs-6">
+                            <label>Centro:&nbsp;&nbsp;&nbsp;</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="centro_represe" name="centro_represe" class="form-control input-sm" placeholder="Centro"> 
+                        </div>                        
+                    </div>-->
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div class="form-inline">
+                        <div class="form-group col-xs-12">
+                            <label>Instituci&oacute;n:</label>
+                            <input  style="width: 92%;"  id="institucion" name="institucion" class="form-control input-sm" placeholder="Intituci&oacute;n"> 
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                </form>
+            </fieldset>
+        </div>  
+        <div id="div_jefes">
+            <form id="frmjefe">
+                <fieldset>
+                    <legend class="titulo" id="titulo_header">Datos del Jefe de CLP o Jefe de UBCH::</legend> 
+                     <!--<br/>
+                        <br/>
+		              <button style="width: 30%;margin: auto" type="button" id="add_institucion" class="btn btn-success btn-block" >
+                        <span class="glyphicon glyphicon-plus "></span>
+                        Registrar 1X10 de Instituciones
+                    </button>-->
+                    <br/>
+        		    <br/>
+        		    <br/>
+        		    <br/>
+                    <div class="form-inline col-xs-3"></div>
+                    <div class="form-group col-xs-6">			
+                        <div class="input-group">
+                            <input  type="text" placeholder="C&eacute;dula" id="cedula_jefe" name="cedula_jefe" class="form-control input-sm"/>
+                            <input type="hidden" id="h_ced_jefe" value="false"/>
+                            <span class="input-group-btn ">
+                                <button style="font-size: 12px;" type="button" id="buscar_patru" class="btn btn-primary btn-sm">
+                                    Buscar
+                                    <!--<span class="glyphicon glyphicon-search "></span>-->
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <fieldset>
+                        <legend class="titulo" id="tipo" style="font-size: 14px;color:#F21331;display: block"></legend>
+                    </fieldset>
+                    <br/>
+                    <br/>
+                    <div class="form-inline">
+                        <div class="form-group col-xs-6">
+                            <label>Nombre:&nbsp;&nbsp;</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="nombre_patru" name="nombre_patru" class="form-control input-sm" placeholder="Nombre">                           
+                        </div>
+                        <div class="form-group col-xs-6">
+                            <label>Tel&eacute;fono:</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="telefono_patru" name="telefono_patru" class="form-control input-sm" placeholder="Tel&eacute;fono"> 
+                        </div>                        
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div class="form-inline">
+                        <div class="form-group col-xs-6">
+                            <label>C&oacute;digo:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="codigo" name="codigo" class="form-control input-sm" placeholder="Nombre">                           
+                        </div>
+                        <div class="form-group col-xs-6">
+                            <label>Centro:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            <input  style="width: 85%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="centro" name="centro" class="form-control input-sm" placeholder="Tel&eacute;fono"> 
+                        </div>                        
+                    </div>
+                </fieldset>
+            </form>
+        </div>  
+        <br/>
+        <br/>
+        <div id="div_nuevo" style="display: none;text-aling:center;margin-left:40%;width:45%" 7228998>			
+            <div id="div_add" style="text-align: center;" class="form-group">
+                <div class="col-xs-5">
+                    <button type="button" id="add" class="btn btn-success btn-block btn-large" >
+                        <span class="glyphicon glyphicon-plus "></span>
+                        Nuevo Registro
+                    </button>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <br/>
+        <div id="div_registro" style="display: none" class="form-group col-xs-12">
+    		<form id="frmregistro">
+    			<fieldset>
+    			    <legend class="titulo">Datos Personales::</legend>
+    			    <br/>
+    			    <div class="form-inline col-xs-3"></div>
+    			    <div class="form-group col-xs-6">			
+    				<div class="input-group">
+    				    <input  type="text" placeholder="C&eacute;dula" id="cedula" name="cedula" class="form-control input-sm" />
+    				    <input type="hidden" id="h_ced" value="false"/>
+    				    <span class="input-group-btn ">
+    					<button style="font-size: 12px;" type="button" id="buscar" class="btn btn-primary btn-sm">
+    					    Buscar
+    					    <!--<span class="glyphicon glyphicon-search "></span>-->
+    					</button>
+    				    </span>
+    				</div>
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-6">
+    				    <label>Primer Nombre:&nbsp;</label>
+    				    <input  style="width: 65%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="p_nombre" name="p_nombre" class="form-control input-sm" placeholder="Primer Nombre">                           
+    				</div>
+    				<div class="form-group col-xs-6">
+    				    <label>Segundo Nombre:&nbsp;&nbsp;</label>
+    				    <input  style="width: 62%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="s_nombre" name="s_nombre" class="form-control input-sm" placeholder="Segundo Nombre"> 
+    				</div>                        
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>                    
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-6">
+    				    <label>Primer Apellido:&nbsp;&nbsp;</label>
+    				    <input  style="width: 65%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="p_apellido" name="p_apellido" class="form-control input-sm" placeholder="Primer Apellido"> 
+    				</div>
+    				<div class="form-group col-xs-6">
+    				    <label>Segundo Apellido:&nbsp;</label>
+    				    <input  style="width: 62%;background-color:#FFFFFF;color:#000000" disabled="disabled" id="s_apellido" name="s_apellido" class="form-control input-sm" placeholder="Segundo Apellido"> 
+    				</div>                        
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>   
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-6">
+    				    <label>Tel&eacute;fono:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    				    <input  style="width: 65%;background-color:#FFFFFF;color:#000000" id="telefono" name="telefono" class="form-control input-sm" placeholder="Tel&eacute;fono" maxlength="11">                           
+    				</div>
+    				<div class="form-group col-xs-6">
+    				    <label>Twitter:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    				    <input  style="width: 62%;background-color:#FFFFFF;color:#000000" id="twitter" name="twitter" class="form-control input-sm" placeholder="Twitter"> 
+    				</div>
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-12">
+    				    <label>Dirección:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</label>
+    				    <textarea class="form-control input-sm"  style="width: 85%;background-color:#FFFFFF;color:#000000;resize: none" id="id_direcc_p" maxlength="100" name="direcc_p" rows="2"></textarea>    
+    				</div>
+    			    </div>
+    			</fieldset>
+    			<br/>
+    			<br/>
+    			<fieldset>
+    			    <legend class="titulo">Datos de la UBCH::</legend>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-4">
+    				    <label>Cod UBCH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    				    <input type='text' class="form-control input-sm" disabled="disabled" style="width: 60%;background-color:#FFFFFF;color:#000000;resize: none" id="cod_ubch" name="cod_ubch">
+    				</div>
+    				<div class="form-group col-md-8">
+    				    <label>UBCH:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    				    <input type='text' class="form-control input-sm" disabled="disabled" style="width: 80.5%;background-color:#FFFFFF;color:#000000;resize: none" id="ubch" name="ubch">
+    				</div>
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-4">
+    				    <label>Estado:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    				    <input type='text' disabled="disabled" class="form-control input-sm" style="width: 60%;background-color:#FFFFFF;color:#000000;resize: none" id="id_estado_p">
+    				</div>
+    				<div class="form-group col-xs-8">
+    				    <label>Municipio:&nbsp;&nbsp;</label>
+    				    <input type='text' disabled="disabled" class="form-control input-sm" style="width: 80%;background-color:#FFFFFF;color:#000000;resize: none" id="id_municipio_p">
+    				</div>
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-12">
+    				    <label>Parroquia:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+    				    <input type='text' disabled="disabled" class="form-control input-sm" style="width: 85%;background-color:#FFFFFF;color:#000000;resize: none" id="id_parroquia_p">
+    				</div>
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-12">
+    				    <label>Dirección:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</label>
+    				    <textarea class="form-control input-sm" disabled="disabled" style="width: 85%;background-color:#FFFFFF;color:#000000;resize: none" id="id_direcc_u" maxlength="100" name="direcc_u" rows="2"></textarea>    
+    				</div>
+    			    </div>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <br/>
+    			    <div class="form-inline">
+    				<div class="form-group col-xs-12" style="text-align:center">
+    				    <input style="margin:  auto;" class="btn btn-primary btn-sm" type="button" id="registrar" value="Registrar"/>
+    				    &nbsp;
+    				    <input class="btn btn-primary btn-sm" type="button" id="cancelar" value="Cancelar"/>
+    				    <input type='hidden' id='id_estado' name='estado'>
+    				    <input type='hidden' id='id_municipio' name='municipio'>
+    				    <input type='hidden' id='id_parroquia' name='parroquia'>
+    				</div>
+    			    </div>
+    			</fieldset>
+    		</form>
+        </div>
+        <div id="div_lista" class="col-xs-12" style="width: 100%">				    
+            <table  style="width: 100%"  class="table table-bordered table-striped table-hover table-condensed dt-responsive table-responsive" id="tabla_ubch" >
+                <thead>
+                    <tr class="info">
+                        <th width="58">&nbsp;</th>
+                        <th width="58">N&deg</th>
+                        <th width="58">Cedula</th>
+                        <th width="64">Nombres</th>
+                        <th width="64">Telefono</th>
+                        <th width="64">Cod UBCH</th>
+                        <th width="64">UBCH</th>
+                        <th width="64">Eliminar</th>
+                        <th width="64">Direcci&oacute;n</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock  %}

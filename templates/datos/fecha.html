@@ -1,0 +1,144 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+		<title>SISTEMA DE REGISTRO Y CONSULTA DE 1x10</title>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap.css"/>
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-theme.css"/>
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/bootstrap-datepicker.min.css"/>
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/animate.css"/>
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/apprise.css"/>
+		<link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/estilo.css"/>
+		<script src="{{STATIC_URL}}js/jquery-1.11.2.min.js"></script>
+		<script src="{{STATIC_URL}}js/bootstrap.min.js"></script>
+		<script src="{{STATIC_URL}}js/apprise.js"></script>
+		<script src="{{STATIC_URL}}js/validarcampos.js"></script>
+		<script src="{{STATIC_URL}}js/jquery.dataTables.js"></script>
+        <script src="{{STATIC_URL}}js/bootstrap-datepicker.min.js"></script>
+        <script src="{{STATIC_URL}}js/bootstrap-datepicker.es.min.js"></script>
+		<script type="text/javascript">
+			$(document).ready(function(){
+
+			    $('#fecha').datepicker({
+                    language: 'es',
+                    startView: 2,
+                    format: 'dd/mm/yyyy',
+                    startDate: '-150y',
+                    endDate: 'today',
+                    autoclose: true
+                });
+				$('#entrar').click(function(event) {
+			  		event.preventDefault();
+			  		if($('#fecha').val() == '') {
+						$('#fecha').parent('div').addClass('has-error').focus();
+						$('#fecha').focus();
+
+					}else{
+					    var data_send = $("#frmlogin").serialize()
+						$.post("/datos/fechalogin/", data_send, function(response){
+                            if (response['success'] == 'ok') {
+                                window.location = '/datos/registro/'
+                            }else if(response.error  == "ok"){
+                            	apprise('<span style="color:#FF0000;font-weight:bold;text-align:center">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Los Datos introducidos son invalidos</span>', {'textOk': 'Aceptar'}, function() {
+
+                                });
+                            }
+                        })
+					}
+				})
+		  	})
+        </script> 
+    
+        <style type="text/css">
+	    html, body {
+                height: 100%;
+                background-color: #E2E2E2;
+            }
+	    body{
+		font-size: 12px;
+	    }
+            .container {
+                width: 350px;
+            }
+            .container > .content {
+                background-color: #fff;
+                padding: 20px;
+                margin: 0 -20px; 
+                -webkit-border-radius: 10px 10px 10px 10px;
+                -moz-border-radius: 10px 10px 10px 10px;
+                border-radius: 10px 10px 10px 10px;
+                -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                margin-top: 30%;
+            }
+            .login {
+                margin-left: 65px;
+	    
+            }           
+            html, body {
+	      height: 100%;
+	      background-color: #E2E2E2;
+	    }
+	    #contenedor {
+	      min-height: 85%;
+	      height: auto !important;
+	      height: 100%;
+	      margin: 0 auto -20px;
+	    }
+	    #header{
+	      background-color: #FFFFFF;
+	      text-align: center;
+	    }
+	    #footer{
+	      height: 55px;
+	      position: fixed;
+	      bottom: 0px;
+	      width:100% !important;
+	      background-color: #FFFFFF;
+	    }
+	    .content {
+		-moz-animation-duration: 4s;
+		-webkit-animation-duration: 4s;
+		-op-animation-duration: 4s;
+	    }
+        </style>
+    </head>
+    <body>
+		<nav class="navbar navbar-inverse" style="margin-bottom:0">
+			<div align="center">
+				<h3><span style='margin-left:-100px' class="label">SISTEMA DE REGISTRO Y CONSULTA DE 1x10</span></h3>
+			</div>
+		</nav>
+		<div style="display: table;clear: both;"></div>
+		<div id="contenedor">
+			<div class="container">
+				<div class="content animated fadeIn">
+					<div class="row">
+						<div class="login login-form">
+							<h3 style="font-size:20px;">Indique Fecha de Nacimiento</h3>
+							<form id="frmlogin" class="form-horizontal"   method="POST" enctype="multipart/form-data" autocomplete="off" role="form">
+								{% csrf_token %}
+								<div class="form-group ">
+									<div id="div_usuario" class='input-group col-sm-12'>
+										<span class="input-group-addon">
+											<span class="glyphicon glyphicon-calendar"></span>
+										</span>
+										<input type="text" readonly="readonly" class="form-control input-sm " style="background-color:#FFFFFF; width: 230px;" id="fecha" name="fecha" placeholder="Fecha de Nacimiento">
+									</div>
+								</div>
+								<div class="form-group" style='margin-left:-61px;width:133%'>
+									<div class="col-sm-offset-62">
+										<input type="button" id="entrar" class="btn btn-primary btn-lg btn-block" style="margin-top: 8x;width:90%" value="Entrar" />
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="footer" style="text-align:center;">
+			<img src="{{ STATIC_URL }}img/footer.png"/>
+		</div>
+    </body>
+</html>       

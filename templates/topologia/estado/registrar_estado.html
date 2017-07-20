@@ -1,0 +1,28 @@
+{% extends "base/base.html" %} <!-- Bloque, Plantilla base -->
+    {% block title %}Registrar Estado{% endblock %}
+    
+    {% block contenido %}
+    
+	<form method="post">
+	    {% csrf_token %}
+	    <table style="text-align:center;">
+	    	<tr>
+	    		<td colspan="2" style='background-color: #D9EDF7'>
+	    			Registrar estado
+	    		</td>
+	    	</tr>
+	    	<tr>
+	    		<td>Cod estado</td>
+	    		<td><input type='number' required id="id_cod_estado" name="cod_estado" required=True/></td>
+	    	</tr>
+	    	<tr>
+	    		<td>Estado</td>
+	    		<td><input id="id_estado" required maxlength="50" name="estado" type="text"/>
+	    		</td>
+	    	</tr>
+	    	<tr>
+	    		<td><input type="submit" value="Registrar"/></td>
+	    	</tr>
+	    </table>
+    </form>
+    {% endblock contenido%}
